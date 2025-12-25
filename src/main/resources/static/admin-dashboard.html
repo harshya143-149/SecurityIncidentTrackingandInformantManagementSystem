@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-blue-50 text-gray-900">
+
+<!-- Authentication -->
+<script>
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    const emailFromLogin = localStorage.getItem("emailFromLogin");
+    const adminName = localStorage.getItem("name");
+
+    if (!token || role !== "ADMIN") {
+        window.location.href = "login.html";
+    }
+</script>
+
+<div class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white text-gray-900 p-6 space-y-6 shadow-lg">
+
+        <h2 class="text-3xl font-extrabold tracking-wide text-blue-600">SITIMS – Admin</h2>
+
+        <nav class="space-y-3">
+            <a href="admin-dashboard.html" class="block p-3 rounded-lg bg-blue-100">Dashboard</a>
+            <a href="admin-incidents.html" class="block p-3 rounded-lg hover:bg-blue-100 transition">Manage Incidents</a>
+            <a href="admin-officers.html" class="block p-3 rounded-lg hover:bg-blue-100 transition">Manage Officers</a>
+            <a href="admin-user.html" class="block p-3 rounded-lg hover:bg-blue-100 transition">Manage Users</a>
+            <a href="admin-informant.html" class="block p-3 rounded-lg hover:bg-blue-100 transition">Manage Informants</a>
+            <a href="admin-tips.html" class="block p-3 rounded-lg hover:bg-blue-100 transition">Manage Tips</a>
+        </nav>
+
+        <button
+                onclick="logout()"
+                class="mt-6 w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition font-semibold text-white">
+            Logout
+        </button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-10">
+
+        <!-- PROFILE CARD -->
+        <div class="bg-white border border-gray-200 shadow-lg rounded-2xl p-6 mb-10">
+
+            <h2 class="text-2xl font-bold text-blue-600 mb-2">Admin Profile</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+
+                <div class="bg-blue-50 p-4 rounded-lg border border-gray-200 shadow-inner">
+                    <p class="text-gray-500 text-sm">Name</p>
+                    <p id="adminName" class="text-xl font-semibold text-gray-900">Admin</p>
+                </div>
+
+                <div class="bg-blue-50 p-4 rounded-lg border border-gray-200 shadow-inner">
+                    <p class="text-gray-500 text-sm">Email</p>
+                    <p id="adminEmail" class="text-xl font-semibold text-gray-900">admin123@gmail.com</p>
+                </div>
+
+                <div class="bg-blue-50 p-4 rounded-lg border border-gray-200 shadow-inner">
+                    <p class="text-gray-500 text-sm">Role</p>
+                    <p class="text-xl font-semibold text-blue-600">ADMIN</p>
+                </div>
+
+                <div class="bg-blue-50 p-4 rounded-lg border border-gray-200 shadow-inner">
+                    <p class="text-gray-500 text-sm">Status</p>
+                    <p class="text-xl font-semibold text-blue-600">Authenticated</p>
+                </div>
+
+            </div>
+        </div>
+
+        <h1 class="text-4xl font-bold mb-8 text-gray-900">Admin Dashboard</h1>
+
+        <!-- Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-lg hover:shadow-xl transition">
+                <h3 class="text-xl font-semibold text-blue-400 mb-2">Total Incidents</h3>
+                <p id="total" class="text-5xl font-bold text-blue-500">0</p>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-lg hover:shadow-xl transition">
+                <h3 class="text-xl font-semibold text-blue-400 mb-2">New Reports</h3>
+                <p id="newCount" class="text-5xl font-bold text-blue-500">0</p>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-lg hover:shadow-xl transition">
+                <h3 class="text-xl font-semibold text-blue-400 mb-2">Resolved</h3>
+                <p id="resolved" class="text-5xl font-bold text-blue-500">0</p>
+            </div>
+
+        </div>
+
+        <!-- Quick Links -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-lg hover:shadow-xl transition">
+                <h3 class="text-xl font-bold mb-3 text-blue-400">Officer Management</h3>
+                <a href="admin-officers.html" class="text-blue-600 hover:underline">View All Officers</a>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-lg hover:shadow-xl transition">
+                <h3 class="text-xl font-bold mb-3 text-blue-400">Informant Management</h3>
+                <a href="admin-informant.html" class="text-blue-600 hover:underline">View/Add Informants</a>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-lg hover:shadow-xl transition">
+                <h3 class="text-xl font-bold mb-3 text-blue-400">Tips Management</h3>
+                <a href="admin-tips.html" class="text-blue-600 hover:underline">View / Manage Tips</a>
+            </div>
+
+        </div>
+
+    </main>
+</div>
+
+<script>
+    async function loadCounts() {
+        try {
+            const res = await fetch("http://localhost:8080/api/incidents/all", {
+                headers: { "Authorization": "Bearer " + token }
+            });
+            if (!res.ok) return;
+
+            const data = await res.json();
+            document.getElementById("total").innerText = data.length;
+            document.getElementById("newCount").innerText = data.filter(i => i.status === "NEW").length;
+            document.getElementById("resolved").innerText = data.filter(i => i.status === "RESOLVED").length;
+
+        } catch {}
+    }
+    loadCounts();
+
+    document.getElementById("adminName").innerText = adminName || "Admin Name";
+    document.getElementById("adminEmail").innerText = emailFromLogin || "admin@example.com";
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = "login.html";
+    }
+</script>
+
+</body>
+</html>

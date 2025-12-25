@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-50 min-h-screen flex items-center justify-center p-6">
+
+<!-- Login Card -->
+<div class="bg-white shadow-lg rounded-3xl p-8 w-full max-w-md">
+    <h2 class="text-3xl font-bold text-center mb-8 text-teal-600">Login</h2>
+
+    <form id="loginForm" class="space-y-6">
+
+        <div>
+            <label class="block font-semibold mb-1 text-gray-700">Email</label>
+            <input type="email" id="email" required
+                   class="w-full border border-gray-300 rounded-lg p-3 bg-white text-gray-900 placeholder-gray-400
+                          focus:ring-2 focus:ring-teal-400 focus:outline-none transition duration-200"
+                   placeholder="Enter email" />
+        </div>
+
+        <div>
+            <label class="block font-semibold mb-1 text-gray-700">Password</label>
+            <input type="password" id="password" required
+                   class="w-full border border-gray-300 rounded-lg p-3 bg-white text-gray-900 placeholder-gray-400
+                          focus:ring-2 focus:ring-teal-400 focus:outline-none transition duration-200"
+                   placeholder="Enter password" />
+        </div>
+
+        <button type="submit"
+                class="w-full bg-teal-500 text-white py-3 rounded-lg font-semibold text-lg
+                       hover:bg-teal-600 transition duration-200 shadow-md hover:shadow-lg">
+            Login
+        </button>
+    </form>
+
+    <p class="text-center mt-4 text-gray-600">
+        Don't have an account?
+        <a href="register.html" class="text-teal-600 hover:underline">Register here</a>
+    </p>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        try {
+            const res = await fetch("http://localhost:8080/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                alert(errorText || "Invalid Credentials!");
+                return;
+            }
+
+            const result = await res.json();
+
+            // Store token and user info
+            if (result.token) localStorage.setItem("token", result.token);
+            localStorage.setItem("role", (result.role || "").toUpperCase());
+            localStorage.setItem("userId", result.id || "");
+            localStorage.setItem("emailFromLogin", result.email || "");
+            localStorage.setItem("name", result.fullName || "");
+
+            // Redirect based on role
+            const role = (result.role || "").toUpperCase();
+            switch(role) {
+                case "ADMIN": window.location.href = "admin-dashboard.html"; break;
+                case "OFFICER": window.location.href = "Officer-dashboard.html"; break;
+                case "INFORMANT": window.location.href = "submit-tip.html"; break;
+                default: window.location.href = "dashboard.html"; break;
+            }
+
+        } catch (err) {
+            console.error(err);
+            alert("Connection error. Please try again.");
+        }
+    });
+</script>
+
+</body>
+</html>

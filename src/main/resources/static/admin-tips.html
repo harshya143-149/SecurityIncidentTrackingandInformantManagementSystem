@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin – Tips</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-50 text-gray-900 p-10">
+
+<script>
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "ADMIN") {
+        window.location.href = "login.html";
+    }
+</script>
+
+<div class="max-w-7xl mx-auto">
+
+    <h2 class="text-3xl font-bold mb-6 text-blue-600">Tips Management</h2>
+
+    <div class="overflow-x-auto bg-white rounded-2xl shadow-xl border border-gray-200">
+        <table class="min-w-full text-left">
+            <thead class="bg-blue-100 text-gray-900">
+            <tr>
+                <th class="p-3">ID</th>
+                <th class="p-3">Title</th>
+                <th class="p-3">Description</th>
+                <th class="p-3">Location</th>
+                <th class="p-3">Severity</th>
+                <th class="p-3">Status</th>
+                <th class="p-3">Create Incident</th>
+                <th class="p-3">Ignore Tip</th>
+            </tr>
+            </thead>
+            <tbody id="tipData" class="text-gray-900">
+            <tr><td colspan="8" class="p-3 text-center">Loading tips...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const API_TIP_URL = "http://localhost:8080/tips";
+
+    function getHeaders() {
+        return {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        };
+    }
+
+    async function loadTips() {
+        try {
+            const res = await fetch(`${API_TIP_URL}/all`, { headers: getHeaders() });
+            const tips = await res.json();
+            const tbody = document.getElementById("tipData");
+
+            if (tips.length === 0) {
+                tbody.innerHTML = "<tr><td colspan='8' class='p-3 text-center'>No tips found</td></tr>";
+                return;
+            }
+
+            tbody.innerHTML = tips.map(t => {
+                const isConverted = t.linkedIncidentId || t.status === "INCIDENT_CREATED";
+                const isIgnored = t.status === "IGNORED";
+
+                return `<tr class="border-b border-gray-200 hover:bg-blue-50 transition">
+                    <td class="p-3">${t.id}</td>
+                    <td class="p-3">${t.title}</td>
+                    <td class="p-3">${t.description}</td>
+                    <td class="p-3">${t.location || "-"}</td>
+                    <td class="p-3">${t.priority || "-"}</td>
+                    <td class="p-3">${t.status}</td>
+                    <td class="p-3">
+                        <button
+                            onclick="convertIncident(${t.id}, this)"
+                            class="px-3 py-1 rounded bg-green-500 hover:bg-green-600 text-white font-semibold text-sm transition"
+                            ${isConverted ? "disabled" : ""}>
+                            ${isConverted ? "Converted" : "Convert"}
+                        </button>
+                    </td>
+                    <td class="p-3">
+                        <button
+                            onclick="ignoreTip(${t.id})"
+                            class="px-3 py-1 rounded bg-red-500 hover:bg-red-600 text-white font-semibold text-sm transition"
+                            ${isIgnored ? "disabled" : ""}>
+                            ${isIgnored ? "Ignored" : "Ignore"}
+                        </button>
+                    </td>
+                </tr>`;
+            }).join("");
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById("tipData").innerHTML = "<tr><td colspan='8' class='p-3 text-center'>Failed to load tips.</td></tr>";
+        }
+    }
+
+    async function convertIncident(tipId, btn) {
+        btn.disabled = true;
+        try {
+            const res = await fetch(`${API_TIP_URL}/${tipId}/convert-to-incident`, {
+                method: "PUT",
+                headers: getHeaders()
+            });
+            if (!res.ok) {
+                const err = await res.text();
+                alert(err);
+            } else {
+                alert("Incident created!");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Failed to create incident");
+        }
+        loadTips();
+    }
+
+    async function ignoreTip(tipId) {
+        try {
+            await fetch(`${API_TIP_URL}/${tipId}/ignore`, {
+                method: "DELETE",
+                headers: getHeaders()
+            });
+        } catch (err) {
+            console.error(err);
+            alert("Failed to ignore tip");
+        }
+        loadTips();
+    }
+
+    loadTips();
+</script>
+
+</body>
+</html>

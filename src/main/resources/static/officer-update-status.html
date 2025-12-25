@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Incident Status</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen p-6 text-gray-100">
+
+<script>
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Please login first!");
+        window.location.href = "login.html";
+    }
+</script>
+
+<div class="bg-gray-800 p-10 rounded-3xl shadow-2xl w-full max-w-md">
+    <h2 class="text-3xl font-bold mb-8 text-center text-blue-400">Update Incident Status</h2>
+
+    <div class="mb-6">
+        <label class="block mb-2 font-semibold text-gray-300">Status</label>
+        <select id="status" class="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="IN_PROGRESS">IN_PROGRESS</option>
+            <option value="RESOLVED">RESOLVED</option>
+            <option value="CLOSED">CLOSED</option>
+        </select>
+    </div>
+
+    <div class="mb-8">
+        <label class="block mb-2 font-semibold text-gray-300">Remark</label>
+        <textarea id="remark" rows="4" placeholder="Enter remark" class="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+    </div>
+
+    <button
+            onclick="updateStatus()"
+            class="w-full bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-3 rounded-lg">
+        Submit
+    </button>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get("id");
+
+    async function updateStatus() {
+        const status = document.getElementById("status").value;
+        const remark = document.getElementById("remark").value;
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/officer/update-status/${id}`, {
+                method: "POST",
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ status, remark })
+            });
+
+            if (!res.ok) {
+                const error = await res.text();
+                return alert("Failed to update status: " + error);
+            }
+
+            alert("Status updated successfully!");
+            window.location.href = "officer-incident-list.html";
+
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    }
+</script>
+
+</body>
+</html>

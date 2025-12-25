@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Users</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-blue-50 text-gray-900 min-h-screen p-10">
+
+<script>
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "ADMIN") {
+        window.location.href = "login.html";
+    }
+</script>
+
+<div class="max-w-6xl mx-auto">
+
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+        <h1 class="text-4xl font-bold text-blue-600">Manage Users</h1>
+
+        <a href="admin-user-update.html"
+           class="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg text-white font-semibold transition">
+            + Add User
+        </a>
+    </div>
+
+    <div class="overflow-x-auto bg-white border border-gray-200 rounded-2xl shadow-xl">
+        <table class="w-full border-collapse text-left">
+            <thead class="bg-blue-100 text-gray-700">
+            <tr>
+                <th class="px-6 py-3">ID</th>
+                <th class="px-6 py-3">Name</th>
+                <th class="px-6 py-3">Email</th>
+                <th class="px-6 py-3">Role</th>
+                <th class="px-6 py-3">Actions</th>
+            </tr>
+            </thead>
+            <tbody id="tbody" class="text-gray-800">
+            <tr>
+                <td colspan="5" class="text-center py-4">Loading users...</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    async function loadUsers() {
+        try {
+            const res = await fetch("http://localhost:8080/api/admin/users/all", {
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (!res.ok) throw new Error("Failed to fetch users");
+
+            const users = await res.json();
+            const tbody = document.getElementById("tbody");
+
+            if (users.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-4">No users found</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = users.map(u => `
+                <tr class="border-b border-gray-200 hover:bg-blue-50 transition">
+                    <td class="px-6 py-3">${u.id}</td>
+                    <td class="px-6 py-3">${u.fullName}</td>
+                    <td class="px-6 py-3">${u.email}</td>
+                    <td class="px-6 py-3">${u.role}</td>
+                    <td class="px-6 py-3 flex gap-2">
+                        <button onclick="editUser(${u.id})"
+                            class="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 rounded text-white transition">
+                            Update
+                        </button>
+                        <button onclick="deleteUser(${u.id})"
+                            class="px-3 py-1 bg-red-500 hover:bg-red-600 rounded text-white transition">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `).join("");
+
+        } catch (error) {
+            alert("Error loading users: " + error.message);
+        }
+    }
+
+    function editUser(id) {
+        window.location.href = `admin-user-update.html?id=${id}`;
+    }
+
+    async function deleteUser(id) {
+        if (!confirm("Delete this user?")) return;
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/admin/users/${id}`, {
+                method: "DELETE",
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (!res.ok) throw new Error("Failed to delete user");
+
+            alert("User deleted!");
+            loadUsers();
+        } catch (err) {
+            alert("Error deleting user: " + err.message);
+        }
+    }
+
+    loadUsers();
+</script>
+
+</body>
+</html>

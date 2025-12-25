@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Officer – Assigned Tips</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-8">
+
+<script>
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    const officerId = localStorage.getItem("userId");
+
+    if (!token || !officerId || role.toUpperCase() !== "OFFICER") {
+        window.location.href = "login.html";
+    }
+</script>
+
+<h1 class="text-4xl font-extrabold text-blue-400 mb-8 text-center">Your Assigned Tips</h1>
+
+<div class="overflow-x-auto rounded-lg shadow-lg border border-gray-700">
+    <table class="w-full table-auto border-collapse text-left">
+        <thead class="bg-gray-800 text-gray-300 uppercase tracking-wide">
+        <tr>
+            <th class="p-4 border-b border-gray-700">ID</th>
+            <th class="p-4 border-b border-gray-700">Title</th>
+            <th class="p-4 border-b border-gray-700">Status</th>
+            <th class="p-4 border-b border-gray-700">Action</th>
+        </tr>
+        </thead>
+        <tbody id="officerTips" class="bg-gray-800 divide-y divide-gray-700"></tbody>
+    </table>
+</div>
+
+<script>
+    async function loadOfficerTips() {
+        try {
+            const res = await fetch(`http://localhost:8080/api/tips/officer/${officerId}`, {
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (res.status === 401 || res.status === 403) {
+                localStorage.clear();
+                alert("Session expired. Please login again.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            if (!res.ok) {
+                alert("Failed to load tips.");
+                return;
+            }
+
+            const tips = await res.json();
+            const tbody = document.getElementById("officerTips");
+            tbody.innerHTML = "";
+
+            tips.forEach(t => {
+                const isReviewed = t.status === 'REVIEWED';
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-700 transition-all duration-150 cursor-pointer">
+                        <td class="p-4">${t.id}</td>
+                        <td class="p-4 font-medium text-blue-300">${t.title}</td>
+                        <td class="p-4 capitalize">${t.status}</td>
+                        <td class="p-4">
+                            <button
+                                class="${isReviewed ? 'bg-gray-600 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} px-4 py-2 rounded-lg text-white font-semibold transition"
+                                onclick="markReviewed(${t.id})"
+                                ${isReviewed ? 'disabled' : ''}>
+                                Reviewed
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+        } catch (err) {
+            console.error(err);
+            alert("Error loading tips.");
+            window.location.href = "login.html";
+        }
+    }
+
+    async function markReviewed(id) {
+        try {
+            const res = await fetch(`http://localhost:8080/api/tips/${id}/update-status?status=REVIEWED`, {
+                method: "PUT",
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (!res.ok) {
+                alert("Failed to update status.");
+                return;
+            }
+
+            loadOfficerTips();
+        } catch (err) {
+            console.error(err);
+            alert("Error updating tip.");
+        }
+    }
+
+    loadOfficerTips();
+</script>
+
+</body>
+</html>

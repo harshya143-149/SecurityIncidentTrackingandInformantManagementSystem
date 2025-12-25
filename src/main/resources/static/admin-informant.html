@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Informants</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-blue-50 text-gray-900 p-10">
+
+<script>
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    // Only ADMIN can access
+    if (!token || role !== "ADMIN") window.location.href = "login.html";
+</script>
+
+<h2 class="text-3xl font-bold mb-6 text-blue-600">Informants</h2>
+
+<a href="admin-add-informant.html"
+   class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg mb-4 inline-block transition">
+    + Add Informant
+</a>
+
+<div class="overflow-auto bg-white rounded-2xl shadow-xl border border-gray-200">
+    <table class="min-w-full text-left">
+        <thead class="bg-blue-100 text-gray-900">
+        <tr>
+            <th class="p-3">ID</th>
+            <th class="p-3">Name</th>
+            <th class="p-3">Phone</th>
+            <th class="p-3">Email</th>
+            <th class="p-3">Address</th>
+            <th class="p-3">Actions</th>
+        </tr>
+        </thead>
+        <tbody id="informantTable"></tbody>
+    </table>
+</div>
+
+<script>
+    async function loadInformants() {
+        try {
+            const res = await fetch("http://localhost:8080/api/informants", {
+                headers: { "Authorization": "Bearer " + token }
+            });
+            const data = await res.json();
+
+            const tbody = document.getElementById("informantTable");
+            tbody.innerHTML = "";
+
+            data.forEach(i => {
+                tbody.innerHTML += `
+                <tr class="border-b border-gray-200 hover:bg-blue-50 transition">
+                    <td class="p-3">${i.id}</td>
+                    <td class="p-3">${i.name}</td>
+                    <td class="p-3">${i.phone}</td>
+                    <td class="p-3">${i.email || '-'}</td>
+                    <td class="p-3">${i.address || '-'}</td>
+                    <td class="p-3 flex gap-2">
+                        <a href="admin-edit-informant.html?id=${i.id}"
+                           class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded transition">
+                            Edit
+                        </a>
+                        <button onclick="del(${i.id})"
+                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+                `;
+            });
+        } catch (err) {
+            console.error(err);
+            alert("Failed to load informants.");
+        }
+    }
+
+    async function del(id) {
+        if (!confirm("Delete this informant?")) return;
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/informants/${id}`, {
+                method: "DELETE",
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (!res.ok) throw new Error(await res.text());
+
+            loadInformants();
+        } catch (err) {
+            console.error(err);
+            alert("Failed to delete informant.");
+        }
+    }
+
+    loadInformants();
+</script>
+
+</body>
+</html>

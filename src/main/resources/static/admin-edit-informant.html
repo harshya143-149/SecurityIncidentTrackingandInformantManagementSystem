@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Informant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-50 text-gray-900 p-10 min-h-screen flex flex-col items-center">
+
+<script>
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "ADMIN") {
+        window.location.href = "login.html";
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+</script>
+
+<h2 class="text-3xl font-bold mb-6 text-teal-600">Edit Informant</h2>
+
+<form id="editForm" class="space-y-4 bg-white p-6 rounded-2xl shadow-lg border border-gray-300 w-full max-w-lg">
+
+    <input type="text" id="name" placeholder="Name"
+           class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-400 outline-none" required>
+
+    <input type="text" id="phone" placeholder="Phone"
+           class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-400 outline-none" required>
+
+    <input type="email" id="email" placeholder="Email"
+           class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-400 outline-none">
+
+    <input type="text" id="address" placeholder="Address"
+           class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-400 outline-none">
+
+    <button type="submit"
+            class="w-full px-4 py-3 bg-teal-500 hover:bg-teal-600 rounded-lg text-white font-semibold transition shadow-md hover:shadow-lg">
+        Update Informant
+    </button>
+</form>
+
+<script>
+    async function loadInformant() {
+        try {
+            const res = await fetch(`http://localhost:8080/api/informants/${id}`, {
+                headers: { "Authorization": "Bearer " + token }
+            });
+            if (!res.ok) throw new Error(await res.text());
+            const data = await res.json();
+
+            document.getElementById("name").value = data.name || "";
+            document.getElementById("phone").value = data.phone || "";
+            document.getElementById("email").value = data.email || "";
+            document.getElementById("address").value = data.address || "";
+        } catch (err) {
+            console.error(err);
+            alert("Error loading informant.");
+        }
+    }
+
+    document.getElementById("editForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const data = {
+            name: document.getElementById("name").value,
+            phone: document.getElementById("phone").value,
+            email: document.getElementById("email").value,
+            address: document.getElementById("address").value
+        };
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/informants/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!res.ok) throw new Error(await res.text());
+
+            alert("Informant updated successfully!");
+            window.location.href = "manage-informants.html";
+        } catch (err) {
+            console.error(err);
+            alert("Error updating informant.");
+        }
+    });
+
+    loadInformant();
+</script>
+
+</body>
+</html>

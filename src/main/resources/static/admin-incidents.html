@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Admin – All Incidents</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-50 min-h-screen text-gray-900">
+
+<script>
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "ADMIN") {
+      alert("Unauthorized!");
+      window.location.href = "dashboard.html";
+    }
+</script>
+
+<div class="max-w-7xl mx-auto mt-12 bg-white rounded-2xl shadow-2xl p-8">
+
+    <h1 class="text-4xl font-extrabold text-blue-600 mb-8 text-center tracking-wide">All Reported Incidents</h1>
+
+    <!-- Status Filter -->
+    <div class="mb-6 flex justify-center">
+        <select id="statusFilter" onchange="filterStatus()"
+                class="p-3 rounded-md border border-gray-300 bg-white text-gray-900 w-64 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <option value="ALL">All</option>
+            <option value="PENDING">Pending</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="RESOLVED">Resolved</option>
+        </select>
+    </div>
+
+    <!-- Active Incidents Table -->
+    <table class="w-full border-collapse shadow-lg rounded-lg overflow-hidden">
+        <thead>
+        <tr class="bg-blue-600 text-white text-lg font-semibold">
+            <th class="p-4">Title</th>
+            <th class="p-4">Location</th>
+            <th class="p-4">Severity</th>
+            <th class="p-4">Status</th>
+            <th class="p-4">Assigned Officer</th>
+            <th class="p-4">Actions</th>
+        </tr>
+        </thead>
+        <tbody id="adminTable" class="bg-blue-100 text-gray-900 text-base"></tbody>
+    </table>
+
+    <!-- Resolved Incidents Table -->
+    <h2 class="text-3xl font-bold text-green-600 my-8 text-center tracking-wide">Resolved Incidents</h2>
+    <table class="w-full border-collapse shadow-lg rounded-lg overflow-hidden">
+        <thead>
+        <tr class="bg-green-600 text-white text-lg font-semibold">
+            <th class="p-4">Title</th>
+            <th class="p-4">Location</th>
+            <th class="p-4">Severity</th>
+            <th class="p-4">Status</th>
+            <th class="p-4">Assigned Officer</th>
+        </tr>
+        </thead>
+        <tbody id="resolvedTableBody" class="bg-green-100 text-gray-900 text-base"></tbody>
+    </table>
+</div>
+
+<!-- Assign Officer Popup -->
+<div id="assignPopup" class="fixed inset-0 bg-black/30 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl p-8 w-96 shadow-xl">
+        <h4 class="text-2xl font-semibold text-blue-600 mb-6">Assign Officer</h4>
+        <select id="officerSelect"
+                class="w-full p-3 rounded border border-gray-300 mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400"></select>
+        <div class="flex justify-end gap-4">
+            <button class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-5 rounded" onclick="closeAssignPopup()">Cancel</button>
+            <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-5 rounded" onclick="assignOfficer()">Assign</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedIncidentId;
+    let allIncidents = [];
+
+    async function loadAllIncidents() {
+      try {
+        const res = await fetch("http://localhost:8080/api/incidents/all", {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        allIncidents = await res.json();
+        renderTable(allIncidents);
+      } catch (error) {
+        console.error('Error loading incidents:', error);
+      }
+    }
+
+    function renderTable(list) {
+      const activeTable = document.getElementById("adminTable");
+      const resolvedTable = document.getElementById("resolvedTableBody");
+      activeTable.innerHTML = "";
+      resolvedTable.innerHTML = "";
+
+      list.forEach(item => {
+        if (item.status === "RESOLVED") {
+          resolvedTable.innerHTML += `
+            <tr class="border-b border-gray-300 hover:bg-gray-200">
+              <td class="p-4">${item.title}</td>
+              <td class="p-4">${item.location}</td>
+              <td class="p-4">${item.severity}</td>
+              <td class="p-4">${item.status}</td>
+              <td class="p-4">${item.assignedOfficer ? item.assignedOfficer.fullName : "Not Assigned"}</td>
+            </tr>
+          `;
+        } else {
+          activeTable.innerHTML += `
+            <tr class="border-b border-gray-300 hover:bg-gray-200">
+              <td class="p-4">${item.title}</td>
+              <td class="p-4">${item.location}</td>
+              <td class="p-4">${item.severity}</td>
+              <td class="p-4 status">${item.status}</td>
+              <td class="p-4">${item.assignedOfficer ? item.assignedOfficer.fullName : "Not Assigned"}</td>
+              <td class="p-4 space-x-3">
+                <button onclick="openAssignPopup(${item.id})" class="bg-blue-300 hover:bg-blue-400 px-4 py-2 rounded text-white font-semibold">Assign Officer</button>
+                <button onclick="deleteIncident(${item.id})" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-white font-semibold">Delete</button>
+              </td>
+            </tr>
+          `;
+        }
+      });
+    }
+
+    function filterStatus() {
+      let selected = document.getElementById("statusFilter").value;
+      let rows = document.querySelectorAll("#adminTable tr");
+
+      rows.forEach(row => {
+        let status = row.querySelector(".status").innerText.trim();
+        if (selected === "ALL" || status === selected) {
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
+      });
+    }
+
+    async function deleteIncident(id) {
+      if (!confirm("Delete this incident?")) return;
+      const res = await fetch(`http://localhost:8080/api/incidents/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": "Bearer " + token }
+      });
+      if (res.ok) alert("Incident Deleted");
+      loadAllIncidents();
+    }
+
+    function openAssignPopup(incidentId) {
+      selectedIncidentId = incidentId;
+      fetch("http://localhost:8080/api/admin/officers", {
+        headers: { "Authorization": "Bearer " + token }
+      })
+        .then(res => res.json())
+        .then(officers => {
+          const select = document.getElementById("officerSelect");
+          select.innerHTML = "";
+          officers.forEach(o => {
+            select.innerHTML += `<option value="${o.id}">${o.fullName} - ${o.phone}</option>`;
+          });
+          document.getElementById("assignPopup").classList.remove("hidden");
+        });
+    }
+
+    function closeAssignPopup() {
+      document.getElementById("assignPopup").classList.add("hidden");
+    }
+
+    function assignOfficer() {
+      const officerId = parseInt(document.getElementById("officerSelect").value);
+      const btn = document.querySelector("#assignPopup button.bg-blue-500");
+      btn.disabled = true;
+
+      fetch("http://localhost:8080/api/incidents/assign", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+          incidentId: selectedIncidentId,
+          officerId: officerId
+        })
+      })
+        .then(res => {
+          btn.disabled = false;
+          if (!res.ok) throw new Error("Assign failed");
+          return res.text();
+        })
+        .then(msg => {
+          alert(msg);
+          closeAssignPopup();
+          loadAllIncidents();
+        })
+        .catch(err => {
+          btn.disabled = false;
+          console.error(err);
+          alert("Failed to assign officer");
+        });
+    }
+
+    loadAllIncidents();
+</script>
+
+</body>
+</html>

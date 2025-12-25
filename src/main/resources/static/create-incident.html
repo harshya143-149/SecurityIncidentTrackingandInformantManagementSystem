@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Incident</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-blue-50 text-gray-900 min-h-screen flex items-center justify-center p-6">
+
+<script>
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Please login first!");
+        window.location.href = "login.html";
+    }
+</script>
+
+<div class="max-w-2xl w-full bg-white border border-gray-200 shadow-xl rounded-2xl p-8">
+
+    <h1 class="text-3xl font-bold text-center mb-8 text-blue-600">Report New Incident</h1>
+
+    <form id="incidentForm" class="space-y-6">
+
+        <div>
+            <label class="block font-semibold mb-2">Title</label>
+            <input id="title" type="text"
+                   class="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                   placeholder="Enter incident title" required>
+        </div>
+
+        <div>
+            <label class="block font-semibold mb-2">Description</label>
+            <textarea id="description" rows="4"
+                      class="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                      placeholder="Describe the incident..." required></textarea>
+        </div>
+
+        <div>
+            <label class="block font-semibold mb-2">Location</label>
+            <input id="location" type="text"
+                   class="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                   placeholder="Example: Mumbai, Sector 12" required>
+        </div>
+
+        <div>
+            <label class="block font-semibold mb-2">Severity</label>
+            <select id="severity"
+                    class="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+                <option value="CRITICAL">Critical</option>
+            </select>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-blue-700 transition shadow-md hover:shadow-lg">
+            Submit Incident
+        </button>
+
+    </form>
+
+</div>
+
+<script>
+    const incidentForm = document.getElementById("incidentForm");
+
+    incidentForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const incidentData = {
+            title: document.getElementById("title").value.trim(),
+            description: document.getElementById("description").value.trim(),
+            location: document.getElementById("location").value.trim(),
+            severity: document.getElementById("severity").value
+        };
+
+        try {
+            const res = await fetch("http://localhost:8080/api/incidents/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify(incidentData)
+            });
+
+            if (res.status === 401 || res.status === 403) {
+                localStorage.clear();
+                alert("Session expired. Please login again.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            if (!res.ok) {
+                const errText = await res.text();
+                alert(errText || "Failed to create incident.");
+                return;
+            }
+
+            alert("Incident Created Successfully!");
+            window.location.href = "my-incidents.html";
+
+        } catch (err) {
+            console.error(err);
+            alert("Error creating incident.");
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Officer Assigned Tips</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen p-6 text-gray-100">
+
+<div class="bg-gray-800 rounded-3xl shadow-2xl w-full max-w-4xl p-8">
+    <h2 class="text-3xl font-bold mb-6 text-blue-400 text-center">Officer Assigned Tips</h2>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-700 rounded-lg">
+            <thead class="bg-gray-700 text-gray-300 uppercase text-sm">
+            <tr>
+                <th class="px-6 py-3 text-left">ID</th>
+                <th class="px-6 py-3 text-left">Title</th>
+                <th class="px-6 py-3 text-left">Status</th>
+                <th class="px-6 py-3 text-left">Action</th>
+            </tr>
+            </thead>
+            <tbody id="officerTips" class="bg-gray-800 divide-y divide-gray-700"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const officerId = localStorage.getItem("officerId") || 2; // dynamically from login
+
+    function loadOfficerTips() {
+        fetch(`/tips/assigned?officerId=${officerId}`)
+            .then(r => r.json())
+            .then(data => {
+                let html = "";
+                data.forEach(t => {
+                    const statusColor = {
+                        'NEW': 'bg-yellow-500 text-black',
+                        'IN_PROGRESS': 'bg-blue-500 text-white',
+                        'REVIEWED': 'bg-green-500 text-white',
+                        'IGNORED': 'bg-gray-500 text-white'
+                    }[t.status] || 'bg-gray-600 text-white';
+
+                    html += `
+                    <tr class="hover:bg-gray-700 transition">
+                        <td class="px-6 py-3">${t.id}</td>
+                        <td class="px-6 py-3">${t.title}</td>
+                        <td class="px-6 py-3">
+                            <span class="px-2 py-1 rounded text-sm ${statusColor}">${t.status}</span>
+                        </td>
+                        <td class="px-6 py-3 flex gap-2">
+                            <button class="px-3 py-1 bg-green-600 hover:bg-green-700 rounded text-sm" onclick="markReviewed(${t.id})">Mark Reviewed</button>
+                            <button class="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm" onclick="ignoreTip(${t.id})">Ignore</button>
+                        </td>
+                    </tr>`;
+                });
+                document.getElementById("officerTips").innerHTML = html;
+            });
+    }
+
+    function markReviewed(tipId) {
+        fetch(`/tips/${tipId}/assign/${officerId}`, { method: "PUT" })
+            .finally(() => loadOfficerTips());
+    }
+
+    function ignoreTip(tipId) {
+        fetch(`/tips/${tipId}/ignore`, { method: "DELETE" })
+            .finally(() => loadOfficerTips());
+    }
+
+    loadOfficerTips();
+</script>
+
+</body>
+</html>

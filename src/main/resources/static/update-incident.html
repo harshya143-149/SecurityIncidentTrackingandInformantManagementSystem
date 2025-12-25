@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Incident</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-blue-50 p-6 flex justify-center items-start min-h-screen">
+
+<div class="w-full max-w-md bg-white shadow-2xl rounded-3xl p-6 mt-10">
+    <h2 class="text-2xl font-bold mb-6 text-center text-blue-600">Update Incident</h2>
+
+    <input id="title" placeholder="Title" class="w-full border border-gray-300 p-3 rounded-lg mb-3 focus:ring-2 focus:ring-blue-400" />
+    <textarea id="description" placeholder="Description" class="w-full border border-gray-300 p-3 rounded-lg mb-3 focus:ring-2 focus:ring-blue-400" rows="3"></textarea>
+    <input id="location" placeholder="Location" class="w-full border border-gray-300 p-3 rounded-lg mb-3 focus:ring-2 focus:ring-blue-400" />
+
+    <select id="severity" class="w-full border border-gray-300 p-3 rounded-lg mb-3 focus:ring-2 focus:ring-blue-400">
+        <option value="LOW">Low</option>
+        <option value="MEDIUM">Medium</option>
+        <option value="HIGH">High</option>
+        <option value="CRITICAL">Critical</option>
+    </select>
+
+    <select id="status" class="w-full border border-gray-300 p-3 rounded-lg mb-4 focus:ring-2 focus:ring-blue-400">
+        <option value="OPEN">OPEN</option>
+        <option value="IN_PROGRESS">IN_PROGRESS</option>
+        <option value="RESOLVED">RESOLVED</option>
+        <option value="CLOSED">CLOSED</option>
+    </select>
+
+    <button id="updateBtn" class="w-full bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-3 rounded-lg mb-2">Update Incident</button>
+    <button class="w-full bg-gray-400 hover:bg-gray-500 transition text-white font-semibold py-3 rounded-lg" onclick="window.history.back()">Cancel</button>
+
+    <p id="msg" class="text-center mt-4 text-lg font-medium"></p>
+</div>
+
+<script>
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Please login first");
+        window.location.href = "login.html";
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const incidentId = params.get("id");
+
+    async function loadIncident() {
+        try {
+            const res = await fetch(`http://localhost:8080/api/incidents/${incidentId}`, {
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (!res.ok) throw new Error("Failed to load incident");
+
+            const inc = await res.json();
+            document.getElementById("title").value = inc.title || '';
+            document.getElementById("description").value = inc.description || '';
+            document.getElementById("location").value = inc.location || '';
+            document.getElementById("severity").value = inc.severity || 'LOW';
+            document.getElementById("status").value = inc.status || 'OPEN';
+        } catch (err) {
+            alert(err.message);
+        }
+    }
+
+    async function updateIncident() {
+        const updateBtn = document.getElementById("updateBtn");
+        updateBtn.disabled = true;
+        updateBtn.innerText = "Updating...";
+
+        const data = {
+            title: document.getElementById("title").value.trim(),
+            description: document.getElementById("description").value.trim(),
+            location: document.getElementById("location").value.trim(),
+            severity: document.getElementById("severity").value,
+            status: document.getElementById("status").value
+        };
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/incidents/${incidentId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!res.ok) throw new Error("Update Failed!");
+
+            const msgEl = document.getElementById("msg");
+            msgEl.innerHTML = "✅ Incident updated successfully!";
+            msgEl.classList.remove("text-red-600");
+            msgEl.classList.add("text-green-600");
+
+            setTimeout(() => {
+                window.location.href = "admin-incidents.html";
+            }, 1500);
+        } catch (err) {
+            const msgEl = document.getElementById("msg");
+            msgEl.innerHTML = `❌ ${err.message}`;
+            msgEl.classList.remove("text-green-600");
+            msgEl.classList.add("text-red-600");
+        } finally {
+            updateBtn.disabled = false;
+            updateBtn.innerText = "Update Incident";
+        }
+    }
+
+    document.getElementById("updateBtn").addEventListener("click", updateIncident);
+    loadIncident();
+</script>
+
+</body>
+</html>
