@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+# Hide local credentials file
+application-local.properties
