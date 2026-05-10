@@ -11,7 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/tips")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:8080") // ✅ FIXED
 public class TipController {
 
     private final TipService tipService;
@@ -27,12 +27,15 @@ public class TipController {
     }
 
     @GetMapping("/assigned")
-    public ResponseEntity<List<TipDTO>> getAssignedTips(@RequestParam Long officerId) {
+    public ResponseEntity<List<TipDTO>> getAssignedTips(
+            @RequestParam Long officerId) {
         return ResponseEntity.ok(tipService.getTipsForOfficer(officerId));
     }
 
     @PutMapping("/{tipId}/assign/{officerId}")
-    public ResponseEntity<TipDTO> assignTip(@PathVariable Long tipId, @PathVariable Long officerId) {
+    public ResponseEntity<TipDTO> assignTip(
+            @PathVariable Long tipId,
+            @PathVariable Long officerId) {
         return ResponseEntity.ok(tipService.assignTipToOfficer(tipId, officerId));
     }
 
@@ -42,13 +45,14 @@ public class TipController {
     }
 
     @PutMapping("/{tipId}/link/{incidentId}")
-    public ResponseEntity<TipDTO> linkTip(@PathVariable Long tipId, @PathVariable Long incidentId) {
+    public ResponseEntity<TipDTO> linkTip(
+            @PathVariable Long tipId,
+            @PathVariable Long incidentId) {
         return ResponseEntity.ok(tipService.linkTipToIncident(tipId, incidentId));
     }
 
-    @DeleteMapping("/{tipId}/ignore")
-    public ResponseEntity<?> ignoreTip(@PathVariable Long tipId) {
-        tipService.ignoreTip(tipId);
-        return ResponseEntity.ok().build();
+    @PutMapping("/{tipId}/ignore") // ✅ FIXED — changed from DELETE to PUT
+    public ResponseEntity<TipDTO> ignoreTip(@PathVariable Long tipId) {
+        return ResponseEntity.ok(tipService.ignoreTip(tipId));
     }
 }
