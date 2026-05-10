@@ -26,9 +26,12 @@ public class UserDetailsImpl implements UserDetails {
         return user.getPassword();
     }
 
+    // ✅ FIXED — return email not username
+    // JWT stores email, so UserDetails must also return email
+    // Previously returning user.getUsername() caused token mismatch
     @Override
     public String getUsername() {
-        return user.getUsername();
+        return user.getEmail();
     }
 
     @Override
