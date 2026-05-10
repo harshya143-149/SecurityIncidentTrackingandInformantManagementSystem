@@ -46,47 +46,54 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+
+                        // ✅ Public endpoints — no login needed
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/api/tips/**",
-
-                                // ✅ Required to allow tip submission
                                 "/tips/submit",
                                 "/tips/**",
-
+                                "/api/tips/**",
                                 "/login.html",
-                                "my-incidents.html",
+                                "/register.html",
+                                "/home.html",
+                                "/submit-tip.html"
+                        ).permitAll()
+
+                        // ✅ FIXED — Admin only endpoints
+                        .requestMatchers(
+                                "/api/admin/**",
+                                "/admin-dashboard.html",
                                 "/admin-incidents.html",
                                 "/admin-informant.html",
                                 "/admin-add-informant.html",
                                 "/admin-edit-informant.html",
-
                                 "/admin-tips.html",
-                                "/register.html",
-                                "/edit-officer.html",
                                 "/admin-user.html",
                                 "/admin-officers.html",
                                 "/add-officer.html",
-                                "/dashboard.html",
-                                "/create-incident.html",
-                                "/update-incident.html",
-                                "/admin-dashboard.html",
                                 "/admin-update-incident.html",
-                                "/admin-user.html",
+                                "/admin-user-update.html"
+                        ).hasRole("ADMIN")
+
+                        // ✅ FIXED — Officer only endpoints
+                        .requestMatchers(
+                                "/api/officer/**",
                                 "/Officer-dashboard.html",
                                 "/officer-incident-details.html",
                                 "/officer-incident-list.html",
                                 "/officer-profile.html",
-                                "/admin-user-update.html",
-                                "/admin-tips.html",
                                 "/Officer-tips.html",
-                                "/home.html",
-                                "/submit-tip.html","/officer-incident-details.html","/edit-profile.html"
-                        ).permitAll()
+                                "/edit-profile.html"
+                        ).hasAnyRole("ADMIN", "OFFICER")
+
+                        // ✅ All other requests need login
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .sessionManagement(sess -> sess
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .addFilterBefore(jwtAuthFilter,
+                    UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
