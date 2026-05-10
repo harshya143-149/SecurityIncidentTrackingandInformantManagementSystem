@@ -5,6 +5,7 @@ import com.harsh.SITIMS.entity.Informant;
 import com.harsh.SITIMS.repository.InformantRepository;
 import com.harsh.SITIMS.service.InformantService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 public class InformantServiceImpl implements InformantService {
 
     private final InformantRepository repository;
+    private final PasswordEncoder passwordEncoder; // ✅ ADDED
 
     // ================= ADD INFORMANT =================
     @Override
@@ -24,18 +26,20 @@ public class InformantServiceImpl implements InformantService {
         informant.setPhone(dto.getPhone());
         informant.setEmail(dto.getEmail());
         informant.setAddress(dto.getAddress());
-        informant.setPassword(dto.getPassword()); // store plain password
+        // ✅ FIXED — BCrypt instead of plain text
+        informant.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         Informant saved = repository.save(informant);
 
-        dto.setId(saved.getId());
-        dto.setName(saved.getName());
-        dto.setPhone(saved.getPhone());
-        dto.setEmail(saved.getEmail());
-        dto.setAddress(saved.getAddress());
-        dto.setPassword(saved.getPassword());
-
-        return dto;
+        // ✅ FIXED — Never return password in response
+        InformantDTO response = new InformantDTO();
+        response.setId(saved.getId());
+        response.setName(saved.getName());
+        response.setPhone(saved.getPhone());
+        response.setEmail(saved.getEmail());
+        response.setAddress(saved.getAddress());
+        // password NOT set in response
+        return response;
     }
 
     // ================= GET ALL =================
@@ -48,7 +52,7 @@ public class InformantServiceImpl implements InformantService {
             dto.setPhone(i.getPhone());
             dto.setEmail(i.getEmail());
             dto.setAddress(i.getAddress());
-            dto.setPassword(i.getPassword());
+            // ✅ FIXED — password NOT included in response
             return dto;
         }).collect(Collectors.toList());
     }
@@ -65,8 +69,7 @@ public class InformantServiceImpl implements InformantService {
         dto.setPhone(i.getPhone());
         dto.setEmail(i.getEmail());
         dto.setAddress(i.getAddress());
-        dto.setPassword(i.getPassword());
-
+        // ✅ FIXED — password NOT included in response
         return dto;
     }
 
@@ -81,19 +84,21 @@ public class InformantServiceImpl implements InformantService {
         i.setEmail(dto.getEmail());
         i.setAddress(dto.getAddress());
 
+        // ✅ FIXED — BCrypt encode on update
         if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
-            i.setPassword(dto.getPassword()); // update plain password
+            i.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
 
         Informant saved = repository.save(i);
 
-        dto.setName(saved.getName());
-        dto.setPhone(saved.getPhone());
-        dto.setEmail(saved.getEmail());
-        dto.setAddress(saved.getAddress());
-        dto.setPassword(saved.getPassword());
-
-        return dto;
+        // ✅ FIXED — Never return password in response
+        InformantDTO response = new InformantDTO();
+        response.setId(saved.getId());
+        response.setName(saved.getName());
+        response.setPhone(saved.getPhone());
+        response.setEmail(saved.getEmail());
+        response.setAddress(saved.getAddress());
+        return response;
     }
 
     // ================= DELETE =================
@@ -105,10 +110,11 @@ public class InformantServiceImpl implements InformantService {
     // ================= AUTHENTICATE =================
     @Override
     public Informant authenticate(String email, String password) {
-        Informant i = repository.findByEmail(email).orElse(null);
+        Informant i = repository.findById(1L).orElse(null);
+        i = repository.findByEmail(email).orElse(null);
         if (i == null) return null;
-
-        return i.getPassword().equals(password) ? i : null; // plain text compare
+        // ✅ FIXED — BCrypt comparison
+        return passwordEncoder.matches(password, i.getPassword()) ? i : null;
     }
 
     // Unused old methods
