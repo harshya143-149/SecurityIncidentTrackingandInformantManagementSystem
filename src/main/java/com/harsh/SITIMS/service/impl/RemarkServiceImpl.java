@@ -4,7 +4,6 @@ import com.harsh.SITIMS.dto.RemarkDTO;
 import com.harsh.SITIMS.entity.*;
 import com.harsh.SITIMS.repository.*;
 import com.harsh.SITIMS.service.RemarkService;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -56,7 +55,7 @@ public class RemarkServiceImpl implements RemarkService {
                     RemarkDTO dto = new RemarkDTO();
                     dto.setId(r.getId());
                     dto.setIncidentId(incidentId);
-                    dto.setText(r.getText());                // <-- this ensures frontend gets the message
+                    dto.setText(r.getText());
                     dto.setCreatedAt(r.getCreatedAt());
                     dto.setOfficerId(r.getOfficer().getId());
                     dto.setOfficerName(r.getOfficer().getFullName());
@@ -65,8 +64,9 @@ public class RemarkServiceImpl implements RemarkService {
                 .collect(Collectors.toList());
     }
 
+    // ✅ FIXED — was returning empty list before
     @Override
     public List<RemarkDTO> getRemarksByIncidentId(Long incidentId) {
-        return List.of();
+        return getRemarksForIncident(incidentId);
     }
 }
