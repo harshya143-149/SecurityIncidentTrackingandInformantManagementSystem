@@ -5,6 +5,7 @@
     <title>Incident Details</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-6">
 
 <script>
@@ -18,33 +19,53 @@
 </script>
 
 <div class="bg-gray-800 rounded-3xl shadow-2xl p-10 w-full max-w-3xl">
-    <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center text-blue-400">Incident Details</h2>
+
+    <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center text-blue-400">
+        Incident Details
+    </h2>
 
     <div id="details" class="space-y-5 text-gray-200 mb-10">
         <p class="text-gray-400 text-center">Loading incident details...</p>
     </div>
 
-    <h3 class="text-2xl font-bold text-blue-300 mb-4">Officer Remark</h3>
+    <h3 class="text-2xl font-bold text-blue-300 mb-4">
+        Officer Remark
+    </h3>
+
     <div id="officerRemark" class="mb-6">
         <p class="text-gray-400">Loading officer remark...</p>
     </div>
 
-    <h3 class="text-2xl font-bold text-blue-300 mb-4">All Remarks</h3>
+    <h3 class="text-2xl font-bold text-blue-300 mb-4">
+        All Remarks
+    </h3>
+
     <div id="remarkList" class="mb-6">
         <p class="text-gray-400">Loading remarks...</p>
     </div>
+
 </div>
 
 <script>
+
     const params = new URLSearchParams(window.location.search);
+
     const id = params.get("id");
 
     async function loadDetails() {
+
         try {
+
             const res = await fetch(`http://localhost:8080/api/incidents/${id}`, {
-                headers: { "Authorization": "Bearer " + token }
+
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+
             });
+
             const inc = await res.json();
+
             let assignedOfficer = inc.assignedOfficer?.name || officerName;
 
             document.getElementById("details").innerHTML = `
@@ -58,61 +79,103 @@
                 ${renderRow("Reported By", inc.reportedBy || "N/A")}
             `;
 
-            // Officer Remark
             document.getElementById("officerRemark").innerHTML = inc.officerRemark
                 ? `<p class="bg-gray-700 p-3 rounded">${inc.officerRemark}</p>`
                 : `<p class="text-gray-400">No officer remark yet.</p>`;
 
         } catch (err) {
+
             console.error(err);
-            document.getElementById("details").innerHTML = `<p class="text-red-600 text-center">Error loading incident details.</p>`;
+
+            document.getElementById("details").innerHTML = `
+                <p class="text-red-600 text-center">
+                    Error loading incident details.
+                </p>
+            `;
         }
     }
 
-    function renderRow(label, value, badgeClasses="") {
+    function renderRow(label, value, badgeClasses = "") {
+
         return `
             <div class="flex flex-col md:flex-row gap-2 md:gap-4 border-b border-gray-700 pb-3">
-                <span class="font-semibold text-blue-400 w-40 md:w-48">${label}:</span>
-                <span class="flex-1 ${badgeClasses} px-2 py-1 rounded">${value || "N/A"}</span>
+                <span class="font-semibold text-blue-400 w-40 md:w-48">
+                    ${label}:
+                </span>
+
+                <span class="flex-1 ${badgeClasses} px-2 py-1 rounded">
+                    ${value || "N/A"}
+                </span>
             </div>
         `;
     }
 
     function getStatusColor(status) {
+
         return {
             'NEW': 'bg-yellow-500 text-black',
             'IN_PROGRESS': 'bg-blue-500 text-white',
-            'ASSIGNED':'bg-indigo-500 text-white',
-            'RESOLVED':'bg-green-500 text-white',
-            'CLOSED':'bg-gray-500 text-white'
+            'ASSIGNED': 'bg-indigo-500 text-white',
+            'RESOLVED': 'bg-green-500 text-white',
+            'CLOSED': 'bg-gray-500 text-white'
         }[status] || 'bg-gray-600 text-white';
     }
 
     async function loadRemarks() {
+
         try {
+
             const res = await fetch(`http://localhost:8080/api/remarks/incident/${id}`, {
-                headers: { "Authorization": "Bearer " + token }
+
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+
             });
+
             const remarks = await res.json();
+
             if (!remarks.length) {
-                document.getElementById("remarkList").innerHTML = `<p class="text-gray-400">No remarks yet.</p>`;
+
+                document.getElementById("remarkList").innerHTML = `
+                    <p class="text-gray-400">No remarks yet.</p>
+                `;
+
                 return;
             }
+
             document.getElementById("remarkList").innerHTML = remarks.map(r => `
                 <div class="bg-gray-700 p-3 rounded mb-2">
-                    <p class="font-semibold text-blue-300">${r.officerName || "Unknown Officer"}</p>
+
+                    <p class="font-semibold text-blue-300">
+                        ${r.officerName || "Unknown Officer"}
+                    </p>
+
                     <p>${r.text}</p>
-                    <p class="text-sm text-gray-400">${r.createdAt}</p>
+
+                    <p class="text-sm text-gray-400">
+                        ${r.createdAt}
+                    </p>
+
                 </div>
             `).join("");
+
         } catch (e) {
+
             console.error(e);
-            document.getElementById("remarkList").innerHTML = `<p class="text-red-500">Failed to load remarks.</p>`;
+
+            document.getElementById("remarkList").innerHTML = `
+                <p class="text-red-500">
+                    Failed to load remarks.
+                </p>
+            `;
         }
     }
 
     loadDetails();
+
     loadRemarks();
+
 </script>
 
 </body>
