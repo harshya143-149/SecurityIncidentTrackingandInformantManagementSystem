@@ -2,20 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITIMS | Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 </head>
+<body class="bg-gray-100 text-gray-900 min-h-screen">
 
-<body class="bg-blue-50 text-gray-900">
-
-<!-- Authentication -->
 <script>
+    const BASE_URL = "http://localhost:8080";
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
-    const emailFromLogin = localStorage.getItem("emailFromLogin");
     const adminName = localStorage.getItem("name");
+    const emailFromLogin = localStorage.getItem("emailFromLogin");
 
-    if (!token || role !== "ADMIN") {
+    // ✅ Token expiry check
+    function isTokenExpired(token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.exp * 1000 < Date.now();
+        } catch { return true; }
+    }
+
+    if (!token || role !== "ADMIN" || isTokenExpired(token)) {
+        localStorage.clear();
         window.location.href = "login.html";
     }
 </script>
@@ -23,123 +33,219 @@
 <div class="flex min-h-screen">
 
     <!-- Sidebar -->
-    <aside class="w-64 bg-white text-gray-900 p-6 space-y-6 shadow-lg">
+    <aside class="w-64 bg-blue-900 text-white flex flex-col p-6 space-y-4 shadow-2xl">
+        <div class="mb-4">
+            <div class="flex items-center gap-3 mb-1">
+                <i class="bi bi-shield-lock-fill text-2xl text-blue-300"></i>
+                <h2 class="text-xl font-extrabold tracking-wide">SITIMS</h2>
+            </div>
+            <p class="text-blue-400 text-xs ml-9">Admin Panel</p>
+        </div>
 
-        <h2 class="text-3xl font-extrabold tracking-wide text-blue-600">SITIMS – Admin</h2>
-
-        <nav class="space-y-3">
-            <a href="admin-dashboard.html" class="block p-3 rounded-lg bg-blue-100">Dashboard</a>
-            <a href="admin-incidents.html" class="block p-3 rounded-lg hover:bg-blue-100 transition">Manage Incidents</a>
-            <a href="admin-officers.html" class="block p-3 rounded-lg hover:bg-blue-100 transition">Manage Officers</a>
-            <a href="admin-user.html" class="block p-3 rounded-lg hover:bg-blue-100 transition">Manage Users</a>
-            <a href="admin-informant.html" class="block p-3 rounded-lg hover:bg-blue-100 transition">Manage Informants</a>
-            <a href="admin-tips.html" class="block p-3 rounded-lg hover:bg-blue-100 transition">Manage Tips</a>
+        <nav class="space-y-1 flex-1">
+            <a href="admin-dashboard.html"
+               class="flex items-center gap-3 p-3 rounded-xl bg-blue-700 text-white font-semibold">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a href="admin-incidents.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+                <i class="bi bi-exclamation-triangle"></i> Incidents
+            </a>
+            <a href="admin-officers.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+                <i class="bi bi-person-badge"></i> Officers
+            </a>
+            <a href="admin-user.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+                <i class="bi bi-people"></i> Users
+            </a>
+            <a href="admin-informant.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+                <i class="bi bi-incognito"></i> Informants
+            </a>
+            <a href="admin-tips.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+                <i class="bi bi-lightbulb"></i> Tips
+            </a>
         </nav>
 
-        <button
-                onclick="logout()"
-                class="mt-6 w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition font-semibold text-white">
-            Logout
+        <button onclick="logout()"
+                class="flex items-center gap-3 p-3 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold">
+            <i class="bi bi-box-arrow-left"></i> Logout
         </button>
     </aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 p-10">
+    <!-- Main -->
+    <main class="flex-1 p-8 overflow-y-auto">
 
-        <!-- PROFILE CARD -->
-        <div class="bg-white border border-gray-200 shadow-lg rounded-2xl p-6 mb-10">
-
-            <h2 class="text-2xl font-bold text-blue-600 mb-2">Admin Profile</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-
-                <div class="bg-blue-50 p-4 rounded-lg border border-gray-200 shadow-inner">
-                    <p class="text-gray-500 text-sm">Name</p>
-                    <p id="adminName" class="text-xl font-semibold text-gray-900">Admin</p>
-                </div>
-
-                <div class="bg-blue-50 p-4 rounded-lg border border-gray-200 shadow-inner">
-                    <p class="text-gray-500 text-sm">Email</p>
-                    <p id="adminEmail" class="text-xl font-semibold text-gray-900">admin123@gmail.com</p>
-                </div>
-
-                <div class="bg-blue-50 p-4 rounded-lg border border-gray-200 shadow-inner">
-                    <p class="text-gray-500 text-sm">Role</p>
-                    <p class="text-xl font-semibold text-blue-600">ADMIN</p>
-                </div>
-
-                <div class="bg-blue-50 p-4 rounded-lg border border-gray-200 shadow-inner">
-                    <p class="text-gray-500 text-sm">Status</p>
-                    <p class="text-xl font-semibold text-blue-600">Authenticated</p>
-                </div>
-
+        <!-- Top Bar -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+                <p class="text-gray-500 text-sm mt-1">Welcome back, <span class="text-blue-600 font-semibold" id="adminNameDisplay"></span></p>
+            </div>
+            <div class="bg-white rounded-xl px-4 py-2 shadow text-sm text-gray-500">
+                <i class="bi bi-calendar3 mr-2"></i>
+                <span id="currentDate"></span>
             </div>
         </div>
 
-        <h1 class="text-4xl font-bold mb-8 text-gray-900">Admin Dashboard</h1>
-
-        <!-- Statistics -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-
-            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-lg hover:shadow-xl transition">
-                <h3 class="text-xl font-semibold text-blue-400 mb-2">Total Incidents</h3>
-                <p id="total" class="text-5xl font-bold text-blue-500">0</p>
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-2xl p-6 shadow-md border-l-4 border-blue-500 hover:shadow-lg transition">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm text-gray-500 font-medium">Total Incidents</p>
+                        <p id="total" class="text-4xl font-bold text-blue-600 mt-1">-</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-xl">
+                        <i class="bi bi-exclamation-triangle-fill text-blue-600 text-xl"></i>
+                    </div>
+                </div>
             </div>
 
-            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-lg hover:shadow-xl transition">
-                <h3 class="text-xl font-semibold text-blue-400 mb-2">New Reports</h3>
-                <p id="newCount" class="text-5xl font-bold text-blue-500">0</p>
+            <div class="bg-white rounded-2xl p-6 shadow-md border-l-4 border-yellow-500 hover:shadow-lg transition">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm text-gray-500 font-medium">Pending</p>
+                        <p id="newCount" class="text-4xl font-bold text-yellow-500 mt-1">-</p>
+                    </div>
+                    <div class="bg-yellow-100 p-3 rounded-xl">
+                        <i class="bi bi-clock-fill text-yellow-500 text-xl"></i>
+                    </div>
+                </div>
             </div>
 
-            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-lg hover:shadow-xl transition">
-                <h3 class="text-xl font-semibold text-blue-400 mb-2">Resolved</h3>
-                <p id="resolved" class="text-5xl font-bold text-blue-500">0</p>
+            <div class="bg-white rounded-2xl p-6 shadow-md border-l-4 border-green-500 hover:shadow-lg transition">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm text-gray-500 font-medium">Resolved</p>
+                        <p id="resolved" class="text-4xl font-bold text-green-600 mt-1">-</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-xl">
+                        <i class="bi bi-check-circle-fill text-green-600 text-xl"></i>
+                    </div>
+                </div>
             </div>
 
+            <div class="bg-white rounded-2xl p-6 shadow-md border-l-4 border-purple-500 hover:shadow-lg transition">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm text-gray-500 font-medium">Assigned</p>
+                        <p id="assigned" class="text-4xl font-bold text-purple-600 mt-1">-</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-xl">
+                        <i class="bi bi-person-check-fill text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Quick Links -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <a href="admin-incidents.html"
+               class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition hover:-translate-y-1 transform cursor-pointer border border-gray-100">
+                <div class="flex items-center gap-4">
+                    <div class="bg-blue-100 p-4 rounded-xl">
+                        <i class="bi bi-exclamation-triangle-fill text-blue-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800">Manage Incidents</h3>
+                        <p class="text-sm text-gray-500">Assign, track & resolve</p>
+                    </div>
+                </div>
+            </a>
 
-            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-lg hover:shadow-xl transition">
-                <h3 class="text-xl font-bold mb-3 text-blue-400">Officer Management</h3>
-                <a href="admin-officers.html" class="text-blue-600 hover:underline">View All Officers</a>
+            <a href="admin-officers.html"
+               class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition hover:-translate-y-1 transform cursor-pointer border border-gray-100">
+                <div class="flex items-center gap-4">
+                    <div class="bg-green-100 p-4 rounded-xl">
+                        <i class="bi bi-person-badge-fill text-green-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800">Manage Officers</h3>
+                        <p class="text-sm text-gray-500">Add, edit & remove</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="admin-tips.html"
+               class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition hover:-translate-y-1 transform cursor-pointer border border-gray-100">
+                <div class="flex items-center gap-4">
+                    <div class="bg-yellow-100 p-4 rounded-xl">
+                        <i class="bi bi-lightbulb-fill text-yellow-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800">Manage Tips</h3>
+                        <p class="text-sm text-gray-500">Convert & assign tips</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Admin Profile Card -->
+        <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
+            <h2 class="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="bi bi-person-circle text-blue-500"></i> Admin Profile
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                    <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Name</p>
+                    <p id="adminName" class="text-gray-800 font-semibold">—</p>
+                </div>
+                <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                    <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Email</p>
+                    <p id="adminEmail" class="text-gray-800 font-semibold">—</p>
+                </div>
+                <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                    <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Role</p>
+                    <span class="bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-bold">ADMIN</span>
+                </div>
+                <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                    <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Status</p>
+                    <span class="bg-green-500 text-white text-xs px-3 py-1 rounded-full font-bold">
+                        <i class="bi bi-circle-fill text-xs mr-1"></i>Authenticated
+                    </span>
+                </div>
             </div>
-
-            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-lg hover:shadow-xl transition">
-                <h3 class="text-xl font-bold mb-3 text-blue-400">Informant Management</h3>
-                <a href="admin-informant.html" class="text-blue-600 hover:underline">View/Add Informants</a>
-            </div>
-
-            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-lg hover:shadow-xl transition">
-                <h3 class="text-xl font-bold mb-3 text-blue-400">Tips Management</h3>
-                <a href="admin-tips.html" class="text-blue-600 hover:underline">View / Manage Tips</a>
-            </div>
-
         </div>
 
     </main>
 </div>
 
 <script>
+    // Set date
+    document.getElementById("currentDate").innerText =
+        new Date().toLocaleDateString("en-IN", { weekday:"long", year:"numeric", month:"long", day:"numeric" });
+
+    // Set admin info
+    document.getElementById("adminName").innerText = adminName || "Admin";
+    document.getElementById("adminEmail").innerText = emailFromLogin || "—";
+    document.getElementById("adminNameDisplay").innerText = adminName || "Admin";
+
+    // ✅ FIXED — Load incident counts with correct status
     async function loadCounts() {
         try {
-            const res = await fetch("http://localhost:8080/api/incidents/all", {
+            const res = await fetch(`${BASE_URL}/api/incidents/all`, {
                 headers: { "Authorization": "Bearer " + token }
             });
             if (!res.ok) return;
-
             const data = await res.json();
+
             document.getElementById("total").innerText = data.length;
-            document.getElementById("newCount").innerText = data.filter(i => i.status === "NEW").length;
-            document.getElementById("resolved").innerText = data.filter(i => i.status === "RESOLVED").length;
-
-        } catch {}
+            // ✅ FIXED — was "NEW" before — should be "PENDING"
+            document.getElementById("newCount").innerText =
+                data.filter(i => i.status === "PENDING").length;
+            document.getElementById("resolved").innerText =
+                data.filter(i => i.status === "RESOLVED").length;
+            document.getElementById("assigned").innerText =
+                data.filter(i => i.status === "ASSIGNED").length;
+        } catch (e) {
+            console.error("Failed to load counts", e);
+        }
     }
-    loadCounts();
 
-    document.getElementById("adminName").innerText = adminName || "Admin Name";
-    document.getElementById("adminEmail").innerText = emailFromLogin || "admin@example.com";
+    loadCounts();
 
     function logout() {
         localStorage.clear();
