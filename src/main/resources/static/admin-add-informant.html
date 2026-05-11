@@ -67,7 +67,8 @@
             if (!res.ok) throw new Error(await res.text());
 
             alert("Informant added successfully!");
-            window.location.href = "manage-informants.html";
+            window.location.href = "admin-informant.html";
+            
         } catch (err) {
             console.error(err);
             alert("Error adding informant.");
