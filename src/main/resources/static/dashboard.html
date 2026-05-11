@@ -27,49 +27,60 @@
 <!-- Main Content -->
 <main class="flex-1 p-8 overflow-y-auto relative">
 
-    <h1 class="text-3xl font-bold mb-6 text-blue-600 text-center">Welcome, <span id="profileNameHeader">User</span>!</h1>
-    <p class="text-gray-500 mb-12 text-center">Here's a quick guide to help you navigate and make the most out of SITIMS.</p>
+    <h1 class="text-3xl font-bold mb-6 text-blue-600 text-center">
+        Welcome, <span id="profileNameHeader">User</span>!
+    </h1>
 
-    <!-- Creative User Manual Section -->
+    <p class="text-gray-500 mb-12 text-center">
+        Here's a quick guide to help you navigate and make the most out of SITIMS.
+    </p>
+
+    <!-- User Manual -->
     <section class="p-6 bg-white rounded-3xl shadow-xl w-full max-w-6xl mx-auto">
         <h2 class="text-3xl font-bold text-blue-600 mb-8 text-center">User Manual</h2>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Register Card -->
+
             <div class="bg-gradient-to-r from-blue-100 to-blue-200 p-6 rounded-2xl shadow-md hover:shadow-xl transition transform hover:-translate-y-2 text-center">
                 <div class="flex items-center justify-center mb-4 text-blue-600 text-5xl">
                     <i class="bi bi-person-plus-fill"></i>
                 </div>
                 <h3 class="text-xl font-semibold mb-2">Register Account</h3>
-                <p class="text-gray-700 text-sm">Sign up quickly using your email and password to start reporting and tracking incidents securely.</p>
+                <p class="text-gray-700 text-sm">
+                    Sign up quickly using your email and password to start reporting and tracking incidents securely.
+                </p>
             </div>
 
-            <!-- Create Incident Card -->
             <div class="bg-gradient-to-r from-green-100 to-green-200 p-6 rounded-2xl shadow-md hover:shadow-xl transition transform hover:-translate-y-2 text-center">
                 <div class="flex items-center justify-center mb-4 text-green-600 text-5xl">
                     <i class="bi bi-journal-plus"></i>
                 </div>
                 <h3 class="text-xl font-semibold mb-2">Create Incident</h3>
-                <p class="text-gray-700 text-sm">Report new incidents with detailed information including location, description, and evidence for faster action.</p>
+                <p class="text-gray-700 text-sm">
+                    Report new incidents with detailed information including location, description, and evidence.
+                </p>
             </div>
 
-            <!-- My Incidents Card -->
             <div class="bg-gradient-to-r from-yellow-100 to-yellow-200 p-6 rounded-2xl shadow-md hover:shadow-xl transition transform hover:-translate-y-2 text-center">
                 <div class="flex items-center justify-center mb-4 text-yellow-600 text-5xl">
                     <i class="bi bi-file-earmark-text-fill"></i>
                 </div>
                 <h3 class="text-xl font-semibold mb-2">My Incidents</h3>
-                <p class="text-gray-700 text-sm">Track all incidents you have reported. Check status updates, timelines, and action taken by authorities.</p>
+                <p class="text-gray-700 text-sm">
+                    Track all incidents you have reported and monitor status updates.
+                </p>
             </div>
 
-            <!-- Help & Support Card -->
             <div class="bg-gradient-to-r from-purple-100 to-purple-200 p-6 rounded-2xl shadow-md hover:shadow-xl transition transform hover:-translate-y-2 text-center">
                 <div class="flex items-center justify-center mb-4 text-purple-600 text-5xl">
                     <i class="bi bi-question-circle-fill"></i>
                 </div>
                 <h3 class="text-xl font-semibold mb-2">Help & Support</h3>
-                <p class="text-gray-700 text-sm">Need assistance? Access FAQs, contact support, and learn best practices for reporting incidents safely.</p>
+                <p class="text-gray-700 text-sm">
+                    Need assistance? Contact support and learn best practices for reporting incidents safely.
+                </p>
             </div>
+
         </div>
     </section>
 
@@ -85,7 +96,6 @@
 
     const profileNameHeader = document.getElementById("profileNameHeader");
 
-    // Load profile from backend
     async function loadProfile() {
         try {
             const res = await fetch(`http://localhost:8080/api/users/${userId}`, {
@@ -93,11 +103,13 @@
             });
 
             if (!res.ok) throw new Error(await res.text());
+
             const user = await res.json();
 
             profileNameHeader.innerText = user.name;
             localStorage.setItem("name", user.name);
             localStorage.setItem("email", user.email);
+
         } catch (err) {
             console.error(err);
             alert("Failed to load profile. Please login again.");
