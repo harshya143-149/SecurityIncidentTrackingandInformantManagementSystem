@@ -2,81 +2,176 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Add Officer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITIMS | Add Officer</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 </head>
-
-<body class="bg-blue-50 text-gray-900 min-h-screen flex flex-col items-center p-6">
+<body class="bg-gray-100 text-gray-900 min-h-screen">
 
 <script>
+    const BASE_URL = "http://localhost:8080";
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
-    if (!token || role !== "ADMIN") window.location.href = "login.html";
+
+    function isTokenExpired(t) {
+        try { const p = JSON.parse(atob(t.split('.')[1])); return p.exp * 1000 < Date.now(); }
+        catch { return true; }
+    }
+    if (!token || role !== "ADMIN" || isTokenExpired(token)) {
+        localStorage.clear(); window.location.href = "login.html";
+    }
 </script>
 
-<div class="bg-white border border-gray-200 rounded-3xl shadow-lg p-8 w-full max-w-lg">
+<div class="flex min-h-screen">
 
-    <h2 class="text-3xl font-bold mb-6 text-blue-600">Add Officer</h2>
-
-    <form id="addOfficerForm" class="space-y-4">
-
-        <div>
-            <label class="block mb-1 text-gray-700">Full Name</label>
-            <input id="fullName" class="w-full bg-white border border-gray-300 p-3 rounded focus:ring-2 focus:ring-blue-400 outline-none" required>
+    <!-- Sidebar -->
+    <aside class="w-64 bg-blue-900 text-white flex flex-col p-6 shadow-2xl">
+        <div class="mb-6">
+            <div class="flex items-center gap-3 mb-1">
+                <i class="bi bi-shield-lock-fill text-2xl text-blue-300"></i>
+                <h2 class="text-xl font-extrabold">SITIMS</h2>
+            </div>
+            <p class="text-blue-400 text-xs ml-9">Admin Panel</p>
         </div>
-
-        <div>
-            <label class="block mb-1 text-gray-700">Email</label>
-            <input id="email" type="email" class="w-full bg-white border border-gray-300 p-3 rounded focus:ring-2 focus:ring-blue-400 outline-none" required>
-        </div>
-
-        <div>
-            <label class="block mb-1 text-gray-700">Phone</label>
-            <input id="phone" class="w-full bg-white border border-gray-300 p-3 rounded focus:ring-2 focus:ring-blue-400 outline-none" required>
-        </div>
-
-        <div>
-            <label class="block mb-1 text-gray-700">Password</label>
-            <input id="password" type="password" class="w-full bg-white border border-gray-300 p-3 rounded focus:ring-2 focus:ring-blue-400 outline-none" required>
-        </div>
-
-        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition shadow-md hover:shadow-lg">
-            Add Officer
+        <nav class="space-y-1 flex-1">
+            <a href="admin-dashboard.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a href="admin-incidents.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-exclamation-triangle"></i> Incidents</a>
+            <a href="admin-officers.html" class="flex items-center gap-3 p-3 rounded-xl bg-blue-700 font-semibold"><i class="bi bi-person-badge"></i> Officers</a>
+            <a href="admin-user.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-people"></i> Users</a>
+            <a href="admin-informant.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-incognito"></i> Informants</a>
+            <a href="admin-tips.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-lightbulb"></i> Tips</a>
+        </nav>
+        <button onclick="logout()" class="flex items-center gap-3 p-3 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold mt-4">
+            <i class="bi bi-box-arrow-left"></i> Logout
         </button>
+    </aside>
 
-    </form>
+    <!-- Main -->
+    <main class="flex-1 p-8 flex items-start justify-center">
+        <div class="w-full max-w-lg">
 
-    <a href="admin-officers.html" class="text-blue-600 hover:underline mt-4 block">
-        ← Back to Officers
-    </a>
+            <!-- Back -->
+            <a href="admin-officers.html" class="flex items-center gap-2 text-blue-600 hover:underline mb-6 text-sm font-semibold">
+                <i class="bi bi-arrow-left"></i> Back to Officers
+            </a>
 
+            <!-- Card -->
+            <div class="bg-white rounded-3xl shadow-lg p-8 border border-gray-100">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-blue-100 p-3 rounded-xl">
+                        <i class="bi bi-person-plus-fill text-blue-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Add Officer</h2>
+                        <p class="text-gray-400 text-sm">Create a new officer account</p>
+                    </div>
+                </div>
+
+                <!-- Error -->
+                <div id="errorMsg" class="hidden bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 mb-5 text-sm flex items-center gap-2">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                    <span id="errorText"></span>
+                </div>
+
+                <form id="addOfficerForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
+                        <div class="relative">
+                            <i class="bi bi-person absolute left-3 top-3.5 text-gray-400"></i>
+                            <input id="name" type="text" required placeholder="Officer full name"
+                                   class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+                        <div class="relative">
+                            <i class="bi bi-envelope absolute left-3 top-3.5 text-gray-400"></i>
+                            <input id="email" type="email" required placeholder="officer@sitims.com"
+                                   class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Phone</label>
+                        <div class="relative">
+                            <i class="bi bi-phone absolute left-3 top-3.5 text-gray-400"></i>
+                            <input id="phone" type="text" required placeholder="+91 98765 43210"
+                                   class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+                        <div class="relative">
+                            <i class="bi bi-lock absolute left-3 top-3.5 text-gray-400"></i>
+                            <input id="password" type="password" required placeholder="Set a strong password"
+                                   class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submitBtn"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition shadow flex items-center justify-center gap-2 mt-2">
+                        <i class="bi bi-person-plus"></i>
+                        <span id="btnText">Add Officer</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
 </div>
 
 <script>
+    function showError(msg) {
+        document.getElementById("errorText").innerText = msg;
+        document.getElementById("errorMsg").classList.remove("hidden");
+    }
+
+    function setLoading(loading) {
+        const btn = document.getElementById("submitBtn");
+        const txt = document.getElementById("btnText");
+        btn.disabled = loading;
+        txt.innerText = loading ? "Adding Officer..." : "Add Officer";
+    }
+
     document.getElementById("addOfficerForm").addEventListener("submit", async e => {
         e.preventDefault();
+        document.getElementById("errorMsg").classList.add("hidden");
+        setLoading(true);
 
         const officer = {
-            fullName: fullName.value,
-            email: email.value,
-            phone: phone.value,
-            password: password.value
+            // ✅ FIXED — was "fullName" before, DTO expects "name"
+            name: document.getElementById("name").value.trim(),
+            email: document.getElementById("email").value.trim(),
+            phone: document.getElementById("phone").value.trim(),
+            password: document.getElementById("password").value,
+            role: "OFFICER"
         };
 
-        const res = await fetch("http://localhost:8080/api/admin/officers/add", {
-            method: "POST",
-            headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
-            body: JSON.stringify(officer)
-        });
+        try {
+            const res = await fetch(`${BASE_URL}/api/admin/officers/add`, {
+                method: "POST",
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(officer)
+            });
 
-        if (!res.ok) {
-            alert("Failed to add officer.");
-            return;
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ error: "Failed to add officer" }));
+                showError(err.error || "Failed to add officer");
+                setLoading(false);
+                return;
+            }
+
+            window.location.href = "admin-officers.html";
+
+        } catch (err) {
+            showError("Connection error. Is the server running?");
+            setLoading(false);
         }
-
-        alert("Officer added!");
-        window.location.href = "admin-officers.html";
     });
+
+    function logout() { localStorage.clear(); window.location.href = "login.html"; }
 </script>
 
 </body>
