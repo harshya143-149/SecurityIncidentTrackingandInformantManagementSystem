@@ -121,7 +121,7 @@
     async function ignoreTip(tipId) {
         try {
             await fetch(`${API_TIP_URL}/${tipId}/ignore`, {
-                method: "DELETE",
+                method: "PUT",
                 headers: getHeaders()
             });
         } catch (err) {
