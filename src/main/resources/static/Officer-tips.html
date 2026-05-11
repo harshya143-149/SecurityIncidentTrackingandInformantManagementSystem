@@ -68,7 +68,12 @@
     }
 
     function ignoreTip(tipId) {
-        fetch(`/tips/${tipId}/ignore`, { method: "DELETE" })
+        fetch(`/tips/${tipId}/ignore`, {
+    method: "PUT",
+    headers: {
+        "Authorization": "Bearer " + localStorage.getItem("token")
+    }
+})
             .finally(() => loadOfficerTips());
     }
 
