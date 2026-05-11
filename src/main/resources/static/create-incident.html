@@ -10,6 +10,7 @@
 
 <script>
     const token = localStorage.getItem("token");
+
     if (!token) {
         alert("Please login first!");
         window.location.href = "login.html";
@@ -18,7 +19,9 @@
 
 <div class="max-w-2xl w-full bg-white border border-gray-200 shadow-xl rounded-2xl p-8">
 
-    <h1 class="text-3xl font-bold text-center mb-8 text-blue-600">Report New Incident</h1>
+    <h1 class="text-3xl font-bold text-center mb-8 text-blue-600">
+        Report New Incident
+    </h1>
 
     <form id="incidentForm" class="space-y-6">
 
@@ -45,12 +48,15 @@
 
         <div>
             <label class="block font-semibold mb-2">Severity</label>
+
             <select id="severity"
                     class="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+
                 <option value="LOW">Low</option>
                 <option value="MEDIUM">Medium</option>
                 <option value="HIGH">High</option>
                 <option value="CRITICAL">Critical</option>
+
             </select>
         </div>
 
@@ -64,9 +70,11 @@
 </div>
 
 <script>
+
     const incidentForm = document.getElementById("incidentForm");
 
     incidentForm.addEventListener("submit", async (e) => {
+
         e.preventDefault();
 
         const incidentData = {
@@ -77,36 +85,52 @@
         };
 
         try {
+
             const res = await fetch("http://localhost:8080/api/incidents/create", {
+
                 method: "POST",
+
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": "Bearer " + token
                 },
+
                 body: JSON.stringify(incidentData)
+
             });
 
             if (res.status === 401 || res.status === 403) {
+
                 localStorage.clear();
+
                 alert("Session expired. Please login again.");
+
                 window.location.href = "login.html";
+
                 return;
             }
 
             if (!res.ok) {
+
                 const errText = await res.text();
+
                 alert(errText || "Failed to create incident.");
+
                 return;
             }
 
             alert("Incident Created Successfully!");
+
             window.location.href = "my-incidents.html";
 
         } catch (err) {
+
             console.error(err);
+
             alert("Error creating incident.");
         }
     });
+
 </script>
 
 </body>
