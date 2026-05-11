@@ -5,52 +5,79 @@
     <title>Assigned Incidents</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-blue-50 min-h-screen p-6 text-gray-900">
 
 <script>
-    // Login/token check
+
     const token = localStorage.getItem("token");
-    const officerEmail = localStorage.getItem("emailFromLogin");
+    const officerEmail = localStorage.getItem("email");
 
     if (!token || !officerEmail) {
+
         alert("Please login first!");
+
         window.location.href = "login.html";
     }
+
 </script>
 
 <div class="max-w-5xl mx-auto bg-white rounded-3xl shadow-2xl p-6">
-    <h2 class="text-3xl font-bold mb-6 text-blue-600 text-center">Your Assigned Incidents</h2>
+
+    <h2 class="text-3xl font-bold mb-6 text-blue-600 text-center">
+        Your Assigned Incidents
+    </h2>
 
     <div class="overflow-x-auto">
+
         <table class="min-w-full border border-gray-300 divide-y divide-gray-300">
+
             <thead class="bg-blue-100 text-gray-700 uppercase text-sm">
+
             <tr>
                 <th class="px-6 py-3 text-left">ID</th>
                 <th class="px-6 py-3 text-left">Title</th>
                 <th class="px-6 py-3 text-left">Status</th>
                 <th class="px-6 py-3 text-left">Action</th>
             </tr>
+
             </thead>
+
             <tbody id="incidentTable" class="bg-white text-gray-900"></tbody>
+
         </table>
+
     </div>
+
 </div>
 
 <script>
+
     async function loadOfficer() {
+
         const res = await fetch(`http://localhost:8080/api/officer/${officerEmail}`, {
-            headers: { "Authorization": "Bearer " + token }
+
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+
         });
 
         if (res.status === 401 || res.status === 403) {
+
             localStorage.clear();
+
             alert("Session expired. Please login again.");
+
             window.location.href = "login.html";
+
             return;
         }
 
         if (!res.ok) {
+
             alert("Failed to fetch officer data.");
+
             return;
         }
 
@@ -58,24 +85,36 @@
     }
 
     async function loadAssignedIncidents() {
+
         try {
+
             const officer = await loadOfficer();
+
             if (!officer) return;
 
             const res = await fetch(`http://localhost:8080/api/officer/assigned/${officer.id}`, {
-                headers: { "Authorization": "Bearer " + token }
+
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+
             });
 
             if (!res.ok) {
+
                 alert("Failed to fetch assigned incidents.");
+
                 return;
             }
 
             const data = await res.json();
+
             const table = document.getElementById("incidentTable");
+
             table.innerHTML = "";
 
             data.forEach(inc => {
+
                 const statusColor = {
                     'NEW': 'bg-yellow-200 text-yellow-800',
                     'IN_PROGRESS': 'bg-blue-200 text-blue-800',
@@ -85,27 +124,39 @@
                 }[inc.status] || 'bg-gray-200 text-gray-800';
 
                 const row = document.createElement("tr");
+
                 row.className = "hover:bg-gray-100 transition duration-200";
+
                 row.innerHTML = `
                     <td class="px-6 py-3 border">${inc.id}</td>
                     <td class="px-6 py-3 border font-medium">${inc.title}</td>
                     <td class="px-6 py-3 border">
-                        <span class="px-2 py-1 rounded text-sm ${statusColor}">${inc.status}</span>
+                        <span class="px-2 py-1 rounded text-sm ${statusColor}">
+                            ${inc.status}
+                        </span>
                     </td>
                     <td class="px-6 py-3 border">
-                        <a href="officer-incident-details.html?id=${inc.id}" class="text-blue-600 hover:underline font-medium">View</a>
+                        <a href="officer-incident-details.html?id=${inc.id}"
+                           class="text-blue-600 hover:underline font-medium">
+                           View
+                        </a>
                     </td>
                 `;
+
                 table.appendChild(row);
+
             });
 
         } catch (err) {
+
             console.error(err);
+
             alert("Error loading assigned incidents.");
         }
     }
 
     loadAssignedIncidents();
+
 </script>
 
 </body>
