@@ -26,10 +26,14 @@
 </div>
 
 <script>
-    const officerId = localStorage.getItem("officerId") || 2; // dynamically from login
+   const officerId = localStorage.getItem("userId"); // dynamically from login
 
     function loadOfficerTips() {
-        fetch(`/tips/assigned?officerId=${officerId}`)
+        fetch(`/tips/assigned?officerId=${officerId}`, {
+    headers: {
+        "Authorization": "Bearer " + localStorage.getItem("token")
+    }
+})
             .then(r => r.json())
             .then(data => {
                 let html = "";
