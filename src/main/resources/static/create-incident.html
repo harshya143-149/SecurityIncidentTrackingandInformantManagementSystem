@@ -2,72 +2,155 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Incident</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 
-<body class="bg-blue-50 text-gray-900 min-h-screen flex items-center justify-center p-6">
+<body class="bg-gray-100 text-gray-900 min-h-screen flex">
 
 <script>
+
     const token = localStorage.getItem("token");
 
     if (!token) {
         alert("Please login first!");
         window.location.href = "login.html";
     }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = "login.html";
+    }
+
 </script>
 
-<div class="max-w-2xl w-full bg-white border border-gray-200 shadow-xl rounded-2xl p-8">
+<!-- Sidebar -->
+<aside class="w-64 bg-blue-900 text-white flex flex-col p-6 shadow-2xl min-h-screen">
 
-    <h1 class="text-3xl font-bold text-center mb-8 text-blue-600">
-        Report New Incident
-    </h1>
-
-    <form id="incidentForm" class="space-y-6">
-
-        <div>
-            <label class="block font-semibold mb-2">Title</label>
-            <input id="title" type="text"
-                   class="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
-                   placeholder="Enter incident title" required>
+    <div class="mb-6">
+        <div class="flex items-center gap-3 mb-1">
+            <i class="bi bi-shield-lock-fill text-2xl text-blue-300"></i>
+            <h2 class="text-xl font-extrabold">SITIMS</h2>
         </div>
 
-        <div>
-            <label class="block font-semibold mb-2">Description</label>
-            <textarea id="description" rows="4"
-                      class="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
-                      placeholder="Describe the incident..." required></textarea>
-        </div>
+        <p class="text-blue-400 text-xs ml-9">User Panel</p>
+    </div>
 
-        <div>
-            <label class="block font-semibold mb-2">Location</label>
-            <input id="location" type="text"
-                   class="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
-                   placeholder="Example: Mumbai, Sector 12" required>
-        </div>
+    <nav class="space-y-1 flex-1">
 
-        <div>
-            <label class="block font-semibold mb-2">Severity</label>
+        <a href="dashboard.html"
+           class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+            <i class="bi bi-speedometer2"></i>
+            Dashboard
+        </a>
 
-            <select id="severity"
-                    class="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+        <a href="create-incident.html"
+           class="flex items-center gap-3 p-3 rounded-xl bg-blue-700 font-semibold">
+            <i class="bi bi-plus-circle"></i>
+            Report Incident
+        </a>
 
-                <option value="LOW">Low</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="HIGH">High</option>
-                <option value="CRITICAL">Critical</option>
+        <a href="my-incidents.html"
+           class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+            <i class="bi bi-file-earmark-text"></i>
+            My Incidents
+        </a>
 
-            </select>
-        </div>
+        <a href="submit-tip.html"
+           class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+            <i class="bi bi-lightbulb"></i>
+            Submit Tip
+        </a>
 
-        <button type="submit"
-                class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-blue-700 transition shadow-md hover:shadow-lg">
-            Submit Incident
-        </button>
+        <a href="user-edit-profile.html"
+           class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+            <i class="bi bi-pencil-square"></i>
+            Edit Profile
+        </a>
 
-    </form>
+    </nav>
 
-</div>
+    <button onclick="logout()"
+            class="flex items-center gap-3 p-3 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold mt-4">
+
+        <i class="bi bi-box-arrow-left"></i>
+        Logout
+
+    </button>
+
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 flex items-center justify-center p-8">
+
+    <div class="max-w-2xl w-full bg-white border border-gray-200 shadow-xl rounded-2xl p-8">
+
+        <h1 class="text-3xl font-bold text-center mb-8 text-blue-600">
+            Report New Incident
+        </h1>
+
+        <form id="incidentForm" class="space-y-6">
+
+            <div>
+                <label class="block font-semibold mb-2">Title</label>
+
+                <input id="title"
+                       type="text"
+                       class="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                       placeholder="Enter incident title"
+                       required>
+            </div>
+
+            <div>
+                <label class="block font-semibold mb-2">Description</label>
+
+                <textarea id="description"
+                          rows="4"
+                          class="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                          placeholder="Describe the incident..."
+                          required></textarea>
+            </div>
+
+            <div>
+                <label class="block font-semibold mb-2">Location</label>
+
+                <input id="location"
+                       type="text"
+                       class="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                       placeholder="Example: Mumbai, Sector 12"
+                       required>
+            </div>
+
+            <div>
+                <label class="block font-semibold mb-2">Severity</label>
+
+                <select id="severity"
+                        class="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH">High</option>
+                    <option value="CRITICAL">Critical</option>
+
+                </select>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-blue-700 transition shadow-md hover:shadow-lg">
+
+                Submit Incident
+
+            </button>
+
+        </form>
+
+    </div>
+
+</main>
 
 <script>
 
@@ -78,10 +161,12 @@
         e.preventDefault();
 
         const incidentData = {
+
             title: document.getElementById("title").value.trim(),
             description: document.getElementById("description").value.trim(),
             location: document.getElementById("location").value.trim(),
             severity: document.getElementById("severity").value
+
         };
 
         try {
@@ -121,7 +206,7 @@
 
             alert("Incident Created Successfully!");
 
-            window.location.href = "my-incidents.html";
+            window.location.href = "dashboard.html";
 
         } catch (err) {
 
@@ -129,6 +214,7 @@
 
             alert("Error creating incident.");
         }
+
     });
 
 </script>

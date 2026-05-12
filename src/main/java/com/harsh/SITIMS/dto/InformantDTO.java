@@ -9,6 +9,10 @@ public class InformantDTO {
     private String phone;
     private String email;
     private String address;
+    private String password;
+
+
+
     // ✅ FIXED — password field removed
     // Never expose password in API response
 }

@@ -55,8 +55,34 @@ public class SecurityConfig {
                                 "/api/tips/**",
                                 "/login.html",
                                 "/register.html",
+                                "/dashboard.html",
                                 "/home.html",
-                                "/submit-tip.html"
+                                "/admin-dashboard.html",
+                                "/admin-incidents.html",
+                                "/admin-informant.html",
+                                "/admin-add-informant.html",
+                                "/admin-edit-informant.html",
+                                "/admin-tips.html",
+                                "/admin-user.html",
+                                "/admin-officers.html",
+                                "/add-officer.html",
+                                "/admin-update-incident.html",
+                                "/admin-user-update.html",
+                                "/Officer-dashboard.html",
+                                "/officer-incident-details.html",
+                                "/officer-incident-list.html",
+                               "/user-edit-profile.html",
+                                "/admin-officer-update.html",
+                                "/Officer-edit-profile.html",
+                                "/Officer-tips.html",
+                                "/update-incident.html",
+                                "/submit-tip.html",
+                                "/officer-update-status.html",
+                                "/officer.html",
+                                "/create-incident.html",
+                               "/edit-officer.html","/my-incidents.html"
+
+
                         ).permitAll()
 
                         // ✅ FIXED — Admin only endpoints

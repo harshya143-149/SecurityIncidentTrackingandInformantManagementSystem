@@ -30,6 +30,12 @@
             <span id="errorText">Invalid credentials</span>
         </div>
 
+        <!-- Session Expired Message -->
+        <div id="sessionMsg" class="hidden bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-xl px-4 py-3 mb-5 text-sm flex items-center gap-2">
+            <i class="bi bi-clock-history"></i>
+            <span>Session expired. Please login again.</span>
+        </div>
+
         <form id="loginForm" class="space-y-5">
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
@@ -76,11 +82,21 @@
 <script>
     const BASE_URL = "http://localhost:8080";
 
-    // ✅ Check if already logged in
-    const existingToken = localStorage.getItem("token");
-    const existingRole = localStorage.getItem("role");
-    if (existingToken && existingRole) {
-        redirectByRole(existingRole);
+    // ✅ STEP 1 — Define ALL functions first
+    function isTokenExpired(t) {
+        try {
+            const p = JSON.parse(atob(t.split('.')[1]));
+            return p.exp * 1000 < Date.now();
+        } catch { return true; }
+    }
+
+    function redirectByRole(role) {
+        switch ((role || "").toUpperCase()) {
+            case "ADMIN":     window.location.href = "admin-dashboard.html"; break;
+            case "OFFICER":   window.location.href = "Officer-dashboard.html"; break;
+            case "INFORMANT": window.location.href = "submit-tip.html"; break;
+            default:          window.location.href = "dashboard.html"; break;
+        }
     }
 
     function togglePassword() {
@@ -98,6 +114,7 @@
     function showError(msg) {
         document.getElementById("errorText").innerText = msg;
         document.getElementById("errorMsg").classList.remove("hidden");
+        document.getElementById("sessionMsg").classList.add("hidden");
     }
 
     function hideError() {
@@ -119,15 +136,23 @@
         }
     }
 
-    function redirectByRole(role) {
-        switch (role.toUpperCase()) {
-            case "ADMIN":    window.location.href = "admin-dashboard.html"; break;
-            case "OFFICER":  window.location.href = "Officer-dashboard.html"; break;
-            case "INFORMANT": window.location.href = "submit-tip.html"; break;
-            default:         window.location.href = "dashboard.html"; break;
+    // ✅ STEP 2 — Check token AFTER functions are defined
+    const existingToken = localStorage.getItem("token");
+    const existingRole = localStorage.getItem("role");
+
+    if (existingToken && existingRole && !isTokenExpired(existingToken)) {
+        // Valid token — redirect to dashboard
+        redirectByRole(existingRole);
+    } else {
+        // No token or expired — clear and show login
+        localStorage.clear();
+        // Show session expired msg only if token existed but expired
+        if (existingToken && isTokenExpired(existingToken)) {
+            document.getElementById("sessionMsg").classList.remove("hidden");
         }
     }
 
+    // ✅ STEP 3 — Login form submit
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         hideError();
@@ -135,6 +160,12 @@
 
         const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value;
+
+        if (!email || !password) {
+            showError("Please enter both email and password.");
+            setLoading(false);
+            return;
+        }
 
         try {
             const res = await fetch(`${BASE_URL}/api/auth/login`, {
@@ -146,18 +177,22 @@
             const result = await res.json();
 
             if (!res.ok) {
-                showError(result.error || "Invalid email or password");
+                showError(result.error || "Invalid email or password.");
                 setLoading(false);
                 return;
             }
 
-            // ✅ Store all user info
+            // ✅ Clear old data first
+            localStorage.clear();
+
+            // ✅ Store fresh login data
             localStorage.setItem("token", result.token);
             localStorage.setItem("role", (result.role || "").toUpperCase());
             localStorage.setItem("userId", result.id || "");
             localStorage.setItem("emailFromLogin", result.email || "");
             localStorage.setItem("name", result.fullName || "");
 
+            // ✅ Redirect based on role
             redirectByRole(result.role);
 
         } catch (err) {

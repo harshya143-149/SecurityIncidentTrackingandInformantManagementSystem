@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITIMS | Officer Profile</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 text-gray-900 min-h-screen flex">
+
+<script>
+    const BASE_URL = "http://localhost:8080";
+
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+
+    function isTokenExpired(t) {
+        try {
+            const p = JSON.parse(atob(t.split('.')[1]));
+            return p.exp * 1000 < Date.now();
+        } catch {
+            return true;
+        }
+    }
+
+    if (!token || !userId || isTokenExpired(token)) {
+        localStorage.clear();
+        window.location.href = "login.html";
+    }
+</script>
+
+<!-- SIDEBAR -->
+<aside class="w-64 bg-blue-900 text-white flex flex-col p-6 shadow-2xl">
+
+    <div class="mb-6">
+        <div class="flex items-center gap-3 mb-1">
+            <i class="bi bi-shield-lock-fill text-2xl text-blue-300"></i>
+            <h2 class="text-xl font-extrabold">SITIMS</h2>
+        </div>
+
+        <p class="text-blue-400 text-xs ml-9">
+            Officer Panel
+        </p>
+    </div>
+
+    <nav class="space-y-1 flex-1">
+
+        <a href="Officer-dashboard.html"
+           class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+            <i class="bi bi-speedometer2"></i>
+            Dashboard
+        </a>
+
+        <a href="officer-incident-list.html"
+           class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+            <i class="bi bi-list-check"></i>
+            My Incidents
+        </a>
+
+        <a href="officer-edit-profile.html"
+           class="flex items-center gap-3 p-3 rounded-xl bg-blue-700 font-semibold">
+            <i class="bi bi-person-gear"></i>
+            Edit Profile
+        </a>
+
+    </nav>
+
+    <button onclick="logout()"
+            class="flex items-center gap-3 p-3 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold mt-4">
+        <i class="bi bi-box-arrow-left"></i>
+        Logout
+    </button>
+
+</aside>
+
+<!-- MAIN -->
+<main class="flex-1 p-8">
+
+    <div class="max-w-2xl mx-auto">
+
+        <!-- HEADING -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">
+                My Profile
+            </h1>
+
+            <p class="text-gray-500 text-sm mt-1">
+                Update your details and password
+            </p>
+        </div>
+
+        <!-- PROFILE CARD -->
+        <div class="bg-white rounded-2xl shadow-md p-8 mb-6 border border-gray-100">
+
+            <div class="flex items-center gap-4 mb-6">
+
+                <div class="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center">
+                    <i class="bi bi-person-badge-fill text-indigo-600 text-3xl"></i>
+                </div>
+
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800"
+                        id="profileNameDisplay">—</h2>
+
+                    <p class="text-gray-500 text-sm"
+                       id="profileEmailDisplay">—</p>
+
+                    <span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded-full font-semibold mt-1 inline-block">
+                        OFFICER
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- ERROR -->
+            <div id="errorMsg"
+                 class="hidden bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 mb-5 text-sm flex items-center gap-2">
+
+                <i class="bi bi-exclamation-circle-fill"></i>
+
+                <span id="errorText"></span>
+
+            </div>
+
+            <!-- SUCCESS -->
+            <div id="successMsg"
+                 class="hidden bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-5 text-sm flex items-center gap-2">
+
+                <i class="bi bi-check-circle-fill"></i>
+
+                <span id="successText"></span>
+
+            </div>
+
+            <!-- PROFILE FORM -->
+            <form id="profileForm" class="space-y-4">
+
+                <div>
+
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">
+                        Full Name
+                    </label>
+
+                    <div class="relative">
+
+                        <i class="bi bi-person absolute left-3 top-3.5 text-gray-400"></i>
+
+                        <input type="text"
+                               id="name"
+                               required
+                               class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+
+                    </div>
+
+                </div>
+
+                <div>
+
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">
+                        Email
+                    </label>
+
+                    <div class="relative">
+
+                        <i class="bi bi-envelope absolute left-3 top-3.5 text-gray-400"></i>
+
+                        <input type="email"
+                               id="email"
+                               required
+                               class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+
+                    </div>
+
+                </div>
+
+                <button type="submit"
+                        id="profileBtn"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition shadow flex items-center justify-center gap-2">
+
+                    <i class="bi bi-check-circle"></i>
+
+                    <span id="profileBtnText">
+                        Update Profile
+                    </span>
+
+                </button>
+
+            </form>
+
+        </div>
+
+        <!-- PASSWORD CARD -->
+        <div class="bg-white rounded-2xl shadow-md p-8 border border-gray-100">
+
+            <h3 class="font-bold text-gray-700 text-lg flex items-center gap-2 mb-6">
+
+                <i class="bi bi-shield-lock text-red-500"></i>
+
+                Change Password
+
+            </h3>
+
+            <div id="pwdErrorMsg"
+                 class="hidden bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 mb-5 text-sm flex items-center gap-2">
+
+                <i class="bi bi-exclamation-circle-fill"></i>
+
+                <span id="pwdErrorText"></span>
+
+            </div>
+
+            <div id="pwdSuccessMsg"
+                 class="hidden bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-5 text-sm flex items-center gap-2">
+
+                <i class="bi bi-check-circle-fill"></i>
+
+                <span>Password updated successfully!</span>
+
+            </div>
+
+            <!-- PASSWORD FORM -->
+            <form id="passwordForm" class="space-y-4">
+
+                <div>
+
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">
+                        New Password
+                    </label>
+
+                    <input type="password"
+                           id="newPassword"
+                           placeholder="Enter new password"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+
+                </div>
+
+                <div>
+
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">
+                        Confirm Password
+                    </label>
+
+                    <input type="password"
+                           id="confirmNewPassword"
+                           placeholder="Confirm password"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+
+                </div>
+
+                <button type="submit"
+                        id="pwdBtn"
+                        class="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-semibold transition shadow flex items-center justify-center gap-2">
+
+                    <i class="bi bi-shield-lock"></i>
+
+                    <span id="pwdBtnText">
+                        Update Password
+                    </span>
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</main>
+
+<script>
+
+    // LOAD DATA
+    const officerName = localStorage.getItem("name") || "";
+    const officerEmail = localStorage.getItem("emailFromLogin") || "";
+
+    document.getElementById("name").value = officerName;
+    document.getElementById("email").value = officerEmail;
+
+    document.getElementById("profileNameDisplay").innerText =
+        officerName || "Officer";
+
+    document.getElementById("profileEmailDisplay").innerText =
+        officerEmail || "—";
+
+    // UPDATE PROFILE
+    document.getElementById("profileForm")
+        .addEventListener("submit", async (e) => {
+
+            e.preventDefault();
+
+            const name =
+                document.getElementById("name").value.trim();
+
+            const email =
+                document.getElementById("email").value.trim();
+
+            try {
+
+                const res = await fetch(
+                    `${BASE_URL}/api/officer/${userId}`,
+                    {
+                        method: "PUT",
+
+                        headers: {
+                            "Authorization": "Bearer " + token,
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            name,
+                            email
+                        })
+                    }
+                );
+
+                if (!res.ok) {
+                    throw new Error();
+                }
+
+                localStorage.setItem("name", name);
+
+                localStorage.setItem(
+                    "emailFromLogin",
+                    email
+                );
+
+                document.getElementById(
+                    "profileNameDisplay"
+                ).innerText = name;
+
+                document.getElementById(
+                    "profileEmailDisplay"
+                ).innerText = email;
+
+                document.getElementById(
+                    "successText"
+                ).innerText = "Profile updated successfully!";
+
+                document.getElementById(
+                    "successMsg"
+                ).classList.remove("hidden");
+
+            } catch {
+
+                document.getElementById(
+                    "errorText"
+                ).innerText = "Failed to update profile.";
+
+                document.getElementById(
+                    "errorMsg"
+                ).classList.remove("hidden");
+            }
+        });
+
+    // UPDATE PASSWORD
+    document.getElementById("passwordForm")
+        .addEventListener("submit", async (e) => {
+
+            e.preventDefault();
+
+            const newPassword =
+                document.getElementById("newPassword").value;
+
+            const confirmPassword =
+                document.getElementById("confirmNewPassword").value;
+
+            if (newPassword !== confirmPassword) {
+
+                document.getElementById(
+                    "pwdErrorText"
+                ).innerText = "Passwords do not match.";
+
+                document.getElementById(
+                    "pwdErrorMsg"
+                ).classList.remove("hidden");
+
+                return;
+            }
+
+            try {
+
+                const res = await fetch(
+                    `${BASE_URL}/api/officer/${userId}`,
+                    {
+                        method: "PUT",
+
+                        headers: {
+                            "Authorization": "Bearer " + token,
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            name: document.getElementById("name").value,
+                            email: document.getElementById("email").value,
+                            password: newPassword
+                        })
+                    }
+                );
+
+                if (!res.ok) {
+                    throw new Error();
+                }
+
+                document.getElementById(
+                    "pwdSuccessMsg"
+                ).classList.remove("hidden");
+
+                document.getElementById(
+                    "newPassword"
+                ).value = "";
+
+                document.getElementById(
+                    "confirmNewPassword"
+                ).value = "";
+
+            } catch {
+
+                document.getElementById(
+                    "pwdErrorText"
+                ).innerText = "Failed to update password.";
+
+                document.getElementById(
+                    "pwdErrorMsg"
+                ).classList.remove("hidden");
+            }
+        });
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = "login.html";
+    }
+
+</script>
+
+</body>
+</html>

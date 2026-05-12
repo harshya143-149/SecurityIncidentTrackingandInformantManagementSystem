@@ -19,24 +19,42 @@ public class OfficerServiceImpl implements OfficerService {
 
     @Override
     public User createOfficer(User officer) {
-        officer.setPassword(passwordEncoder.encode(officer.getPassword()));
-        officer.setRole(Role.OFFICER); // force role to OFFICER
+
+        officer.setPassword(
+                passwordEncoder.encode(officer.getPassword())
+        );
+
+        officer.setRole(Role.OFFICER);
+
         return userRepository.save(officer);
     }
 
     @Override
     public User updateOfficer(Long id, User updatedOfficer) {
+
         User officer = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Officer not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("Officer not found"));
 
-        officer.setFullName(updatedOfficer.getFullName());
+        // ✅ FIXED
+        officer.setName(updatedOfficer.getName());
+
         officer.setEmail(updatedOfficer.getEmail());
-        officer.setPhone(updatedOfficer.getPhone());
-        officer.setUsername(updatedOfficer.getUsername());
-        officer.setRole(Role.OFFICER); // ensure role stays OFFICER
 
-        if (updatedOfficer.getPassword() != null && !updatedOfficer.getPassword().isEmpty()) {
-            officer.setPassword(passwordEncoder.encode(updatedOfficer.getPassword()));
+        officer.setPhone(updatedOfficer.getPhone());
+
+        // ✅ ALWAYS KEEP ROLE AS OFFICER
+        officer.setRole(Role.OFFICER);
+
+        // ✅ PASSWORD UPDATE
+        if (updatedOfficer.getPassword() != null &&
+                !updatedOfficer.getPassword().isEmpty()) {
+
+            officer.setPassword(
+                    passwordEncoder.encode(
+                            updatedOfficer.getPassword()
+                    )
+            );
         }
 
         return userRepository.save(officer);
@@ -49,24 +67,34 @@ public class OfficerServiceImpl implements OfficerService {
 
     @Override
     public List<User> getAllOfficers() {
-        return userRepository.findByRole(Role.valueOf(String.valueOf(Role.OFFICER)));
+        return userRepository.findByRole(Role.OFFICER);
     }
 
     @Override
     public User getOfficerById(Long id) {
+
         User officer = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Officer not found"));
-        if (officer.getRole() != Role.OFFICER)
+                .orElseThrow(() ->
+                        new RuntimeException("Officer not found"));
+
+        if (officer.getRole() != Role.OFFICER) {
             throw new RuntimeException("User is not an officer");
+        }
+
         return officer;
     }
 
     @Override
     public User getOfficerByEmail(String email) {
+
         User officer = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Officer not found"));
-        if (officer.getRole() != Role.OFFICER)
+                .orElseThrow(() ->
+                        new RuntimeException("Officer not found"));
+
+        if (officer.getRole() != Role.OFFICER) {
             throw new RuntimeException("User is not an officer");
+        }
+
         return officer;
     }
 }

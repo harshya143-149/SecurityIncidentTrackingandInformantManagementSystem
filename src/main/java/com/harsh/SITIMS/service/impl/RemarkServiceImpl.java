@@ -41,32 +41,73 @@ public class RemarkServiceImpl implements RemarkService {
         dto.setOfficerId(officer.getId());
         dto.setOfficerName(officer.getFullName());
         dto.setCreatedAt(remark.getCreatedAt());
+
         return dto;
     }
 
     @Override
     public List<RemarkDTO> getRemarksForIncident(Long incidentId) {
+
         Incident incident = incidentRepository.findById(incidentId)
                 .orElseThrow(() -> new RuntimeException("Incident not found"));
 
         return remarkRepository.findByIncidentOrderByCreatedAtDesc(incident)
                 .stream()
                 .map(r -> {
+
                     RemarkDTO dto = new RemarkDTO();
+
                     dto.setId(r.getId());
                     dto.setIncidentId(incidentId);
                     dto.setText(r.getText());
                     dto.setCreatedAt(r.getCreatedAt());
                     dto.setOfficerId(r.getOfficer().getId());
                     dto.setOfficerName(r.getOfficer().getFullName());
+
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
 
-    // ✅ FIXED — was returning empty list before
     @Override
     public List<RemarkDTO> getRemarksByIncidentId(Long incidentId) {
         return getRemarksForIncident(incidentId);
+    }
+
+    // =========================
+    // UPDATE REMARK
+    // =========================
+    @Override
+    public RemarkDTO updateRemark(Long remarkId, String text) {
+
+        Remark remark = remarkRepository.findById(remarkId)
+                .orElseThrow(() -> new RuntimeException("Remark not found"));
+
+        remark.setText(text);
+
+        remarkRepository.save(remark);
+
+        RemarkDTO dto = new RemarkDTO();
+
+        dto.setId(remark.getId());
+        dto.setIncidentId(remark.getIncident().getId());
+        dto.setText(remark.getText());
+        dto.setCreatedAt(remark.getCreatedAt());
+        dto.setOfficerId(remark.getOfficer().getId());
+        dto.setOfficerName(remark.getOfficer().getFullName());
+
+        return dto;
+    }
+
+    // =========================
+    // DELETE REMARK
+    // =========================
+    @Override
+    public void deleteRemark(Long remarkId) {
+
+        Remark remark = remarkRepository.findById(remarkId)
+                .orElseThrow(() -> new RuntimeException("Remark not found"));
+
+        remarkRepository.delete(remark);
     }
 }

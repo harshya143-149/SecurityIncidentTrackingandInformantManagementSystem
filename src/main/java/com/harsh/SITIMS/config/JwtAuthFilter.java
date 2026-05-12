@@ -1,7 +1,7 @@
 package com.harsh.SITIMS.config;
 
-import com.harsh.SITIMS.service.impl.UserDetailsServiceImpl;
 import com.harsh.SITIMS.service.JwtService;
+import com.harsh.SITIMS.service.impl.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,33 +29,38 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Skip JWT authentication for tip submissions
-        if (request.getServletPath().startsWith("/api/tips/") ||
-            request.getServletPath().startsWith("/tips/")) {
+        // Skip JWT for public endpoints
+        if (request.getServletPath().startsWith("/api/tips/")
+                || request.getServletPath().startsWith("/tips/")
+                || request.getServletPath().startsWith("/api/auth/")
+                || request.getServletPath().endsWith(".html")) {
+
             filterChain.doFilter(request, response);
             return;
         }
 
         String authHeader = request.getHeader("Authorization");
+
         String token = null;
         String email = null;
 
+        // Extract token
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
+
             try {
                 email = jwtService.extractUsername(token);
             } catch (Exception e) {
-                // Invalid token — continue without authentication
                 filterChain.doFilter(request, response);
                 return;
             }
         }
 
+        // Authenticate user if not already authenticated
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-            // ✅ FIXED — validate token before setting authentication
             if (jwtService.isTokenValid(token, userDetails)) {
 
                 UsernamePasswordAuthenticationToken authToken =
@@ -66,8 +71,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         );
 
                 authToken.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
+                        new WebAuthenticationDetailsSource().buildDetails(request)
                 );
+
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
