@@ -16,17 +16,20 @@ public class Remark {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String text;                 // remark message
+    // remark text
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String text;
 
-    private LocalDateTime createdAt;     // timestamp
+    // timestamp
+    private LocalDateTime createdAt;
 
-    // Each remark belongs to 1 incident
-    @ManyToOne
-    @JoinColumn(name = "incident_id")
+    // incident linked
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "incident_id", nullable = false)
     private Incident incident;
 
-    // Which officer added the remark
-    @ManyToOne
-    @JoinColumn(name = "officer_id")
+    // OWNER (ONLY SOURCE OF TRUTH)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "officer_id", nullable = false)
     private User officer;
 }

@@ -1,8 +1,8 @@
 package com.harsh.SITIMS.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -14,13 +14,22 @@ public class IncidentDTO {
     private String severity;
     private String location;
 
-    private Long assignedOfficerId;  // optional
-    private Long linkedTipId;        // optional
+    private Long assignedOfficerId;
+    private Long linkedTipId;
 
-    private String category; // if you want category support
+    private String category;
 
-    // Custom constructor for selected fields
-    public IncidentDTO(String title, String description, String category, String location) {
+    private String status;
+
+    // ✅ ADD THIS
+    private String officerRemark;
+
+    public IncidentDTO(
+            String title,
+            String description,
+            String category,
+            String location
+    ) {
         this.title = title;
         this.description = description;
         this.category = category;

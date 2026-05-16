@@ -1,9 +1,11 @@
 package com.harsh.SITIMS.controller;
 
 import com.harsh.SITIMS.dto.RemarkDTO;
-import com.harsh.SITIMS.service.impl.UserDetailsImpl;
 import com.harsh.SITIMS.service.RemarkService;
+import com.harsh.SITIMS.service.impl.UserDetailsImpl;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -13,62 +15,61 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/remarks")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "*")
 public class RemarkController {
 
     private final RemarkService remarkService;
 
-    // =========================
-    // ADD REMARK
-    // =========================
+    // ADD
     @PostMapping("/add")
-    public ResponseEntity<RemarkDTO> addRemark(
+    public ResponseEntity<?> addRemark(
             @RequestBody RemarkDTO dto,
             @AuthenticationPrincipal UserDetailsImpl officer) {
 
-        RemarkDTO saved =
-                remarkService.addRemark(dto, officer.getUsername());
+        if (officer == null) {
+            return ResponseEntity.badRequest().body("User not authenticated");
+        }
 
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(
+                remarkService.addRemark(dto, officer.getUsername())
+        );
     }
 
-    // =========================
-    // GET REMARKS BY INCIDENT
-    // =========================
+    // GET
     @GetMapping("/incident/{id}")
-    public ResponseEntity<List<RemarkDTO>> getRemarks(
-            @PathVariable Long id) {
-
+    public ResponseEntity<List<RemarkDTO>> getRemarks(@PathVariable Long id) {
         return ResponseEntity.ok(
                 remarkService.getRemarksForIncident(id)
         );
     }
 
-    // =========================
-    // UPDATE REMARK
-    // =========================
+    // UPDATE (OWNER ONLY)
     @PutMapping("/update/{remarkId}")
-    public ResponseEntity<RemarkDTO> updateRemark(
+    public ResponseEntity<?> updateRemark(
             @PathVariable Long remarkId,
-            @RequestParam String text) {
-
-        RemarkDTO updated =
-                remarkService.updateRemark(remarkId, text);
-
-        return ResponseEntity.ok(updated);
-    }
-
-    // =========================
-    // DELETE REMARK
-    // =========================
-    @DeleteMapping("/delete/{remarkId}")
-    public ResponseEntity<String> deleteRemark(
-            @PathVariable Long remarkId) {
-
-        remarkService.deleteRemark(remarkId);
+            @RequestParam String text,
+            @AuthenticationPrincipal UserDetailsImpl officer) {
 
         return ResponseEntity.ok(
-                "Remark deleted successfully"
+                remarkService.updateRemark(
+                        remarkId,
+                        text,
+                        officer.getUsername()
+                )
         );
+    }
+
+    // DELETE (OWNER ONLY)
+    @DeleteMapping("/delete/{remarkId}")
+    public ResponseEntity<?> deleteRemark(
+            @PathVariable Long remarkId,
+            @AuthenticationPrincipal UserDetailsImpl officer) {
+
+        remarkService.deleteRemark(
+                remarkId,
+                officer.getUsername()
+        );
+
+        return ResponseEntity.ok("Remark deleted successfully");
     }
 }

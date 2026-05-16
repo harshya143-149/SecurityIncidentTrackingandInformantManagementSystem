@@ -26,6 +26,11 @@ public class OfficerServiceImpl implements OfficerService {
 
         officer.setRole(Role.OFFICER);
 
+        // ✅ SAFETY FIX
+        if (officer.getName() == null || officer.getName().isBlank()) {
+            officer.setName("Officer");
+        }
+
         return userRepository.save(officer);
     }
 
@@ -36,11 +41,14 @@ public class OfficerServiceImpl implements OfficerService {
                 .orElseThrow(() ->
                         new RuntimeException("Officer not found"));
 
-        // ✅ FIXED
-        officer.setName(updatedOfficer.getName());
+        // ✅ FIXED (kept same logic, added safety)
+        if (updatedOfficer.getName() != null && !updatedOfficer.getName().isBlank()) {
+            officer.setName(updatedOfficer.getName());
+        } else {
+            officer.setName("Officer");
+        }
 
         officer.setEmail(updatedOfficer.getEmail());
-
         officer.setPhone(updatedOfficer.getPhone());
 
         // ✅ ALWAYS KEEP ROLE AS OFFICER
@@ -51,9 +59,7 @@ public class OfficerServiceImpl implements OfficerService {
                 !updatedOfficer.getPassword().isEmpty()) {
 
             officer.setPassword(
-                    passwordEncoder.encode(
-                            updatedOfficer.getPassword()
-                    )
+                    passwordEncoder.encode(updatedOfficer.getPassword())
             );
         }
 

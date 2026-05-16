@@ -1,7 +1,6 @@
 package com.harsh.SITIMS.service;
 
 import com.harsh.SITIMS.dto.RemarkDTO;
-
 import java.util.List;
 
 public interface RemarkService {
@@ -12,9 +11,9 @@ public interface RemarkService {
 
     List<RemarkDTO> getRemarksByIncidentId(Long incidentId);
 
-    // UPDATE REMARK
-    RemarkDTO updateRemark(Long remarkId, String text);
+    // ✅ FIXED
+    RemarkDTO updateRemark(Long remarkId, String text, String officerEmail);
 
-    // DELETE REMARK
-    void deleteRemark(Long remarkId);
+    // ✅ FIXED
+    void deleteRemark(Long remarkId, String officerEmail);
 }

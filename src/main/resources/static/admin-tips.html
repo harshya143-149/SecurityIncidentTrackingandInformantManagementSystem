@@ -4,245 +4,711 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SITIMS | Manage Tips</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+          rel="stylesheet">
 </head>
+
 <body class="bg-gray-100 text-gray-900 min-h-screen">
 
 <script>
+
     const BASE_URL = "http://localhost:8080";
+
     const token = localStorage.getItem("token");
+
     const role = localStorage.getItem("role");
 
     function isTokenExpired(t) {
-        try { const p = JSON.parse(atob(t.split('.')[1])); return p.exp * 1000 < Date.now(); }
-        catch { return true; }
+
+        try {
+
+            const p = JSON.parse(atob(t.split('.')[1]));
+
+            return p.exp * 1000 < Date.now();
+
+        } catch {
+
+            return true;
+        }
     }
+
     if (!token || role !== "ADMIN" || isTokenExpired(token)) {
-        localStorage.clear(); window.location.href = "login.html";
+
+        localStorage.clear();
+
+        window.location.href = "login.html";
     }
+
 </script>
 
 <div class="flex min-h-screen">
 
-    <!-- Sidebar -->
+    <!-- SIDEBAR -->
     <aside class="w-64 bg-blue-900 text-white flex flex-col p-6 shadow-2xl">
+
         <div class="mb-6">
+
             <div class="flex items-center gap-3 mb-1">
+
                 <i class="bi bi-shield-lock-fill text-2xl text-blue-300"></i>
-                <h2 class="text-xl font-extrabold">SITIMS</h2>
+
+                <h2 class="text-xl font-extrabold">
+                    SITIMS
+                </h2>
+
             </div>
-            <p class="text-blue-400 text-xs ml-9">Admin Panel</p>
+
+            <p class="text-blue-400 text-xs ml-9">
+                Admin Panel
+            </p>
+
         </div>
+
         <nav class="space-y-1 flex-1">
-            <a href="admin-dashboard.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-speedometer2"></i> Dashboard</a>
-            <a href="admin-incidents.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-exclamation-triangle"></i> Incidents</a>
-            <a href="admin-officers.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-person-badge"></i> Officers</a>
-            <a href="admin-user.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-people"></i> Users</a>
-            <a href="admin-informant.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-incognito"></i> Informants</a>
-            <a href="admin-tips.html" class="flex items-center gap-3 p-3 rounded-xl bg-blue-700 font-semibold"><i class="bi bi-lightbulb"></i> Tips</a>
+
+            <a href="admin-dashboard.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+
+                <i class="bi bi-speedometer2"></i>
+
+                Dashboard
+            </a>
+
+            <a href="admin-incidents.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+
+                <i class="bi bi-exclamation-triangle"></i>
+
+                Incidents
+            </a>
+
+            <a href="admin-officers.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+
+                <i class="bi bi-person-badge"></i>
+
+                Officers
+            </a>
+
+            <a href="admin-user.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+
+                <i class="bi bi-people"></i>
+
+                Users
+            </a>
+
+            <a href="admin-informant.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+
+                <i class="bi bi-incognito"></i>
+
+                Informants
+            </a>
+
+            <!-- ACTIVE -->
+            <a href="admin-tips.html"
+               class="flex items-center gap-3 p-3 rounded-xl bg-blue-700 font-semibold">
+
+                <i class="bi bi-lightbulb"></i>
+
+                Tips
+            </a>
+
         </nav>
-        <button onclick="logout()" class="flex items-center gap-3 p-3 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold mt-4">
-            <i class="bi bi-box-arrow-left"></i> Logout
+
+        <button onclick="logout()"
+                class="flex items-center gap-3 p-3 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold mt-4">
+
+            <i class="bi bi-box-arrow-left"></i>
+
+            Logout
         </button>
+
     </aside>
 
-    <!-- Main -->
+    <!-- MAIN -->
     <main class="flex-1 p-8">
 
-        <!-- Header -->
+        <!-- HEADER -->
         <div class="flex justify-between items-center mb-8">
+
             <div>
-                <h1 class="text-3xl font-bold text-gray-800">Tips Management</h1>
-                <p class="text-gray-500 text-sm mt-1">Review, convert and manage all submitted tips</p>
+
+                <h1 class="text-3xl font-bold text-gray-800">
+                    Tips Management
+                </h1>
+
+                <p class="text-gray-500 text-sm mt-1">
+                    Review, convert, delete and manage all submitted tips
+                </p>
+
             </div>
+
             <button onclick="loadTips()"
                     class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition shadow">
-                <i class="bi bi-arrow-clockwise"></i> Refresh
+
+                <i class="bi bi-arrow-clockwise"></i>
+
+                Refresh
+
             </button>
+
         </div>
 
-        <!-- Toast -->
-        <div id="toast" class="hidden fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white font-semibold text-sm flex items-center gap-2"></div>
+        <!-- TOAST -->
+        <div id="toast"
+             class="hidden fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white font-semibold text-sm flex items-center gap-2">
+        </div>
 
-        <!-- Stats Row -->
+        <!-- STATS -->
         <div class="grid grid-cols-4 gap-4 mb-8">
+
             <div class="bg-white rounded-2xl p-4 shadow border-l-4 border-blue-500">
-                <p class="text-xs text-gray-400 uppercase font-semibold">Total Tips</p>
-                <p id="totalTips" class="text-3xl font-bold text-blue-600 mt-1">-</p>
+
+                <p class="text-xs text-gray-400 uppercase font-semibold">
+                    Total Tips
+                </p>
+
+                <p id="totalTips"
+                   class="text-3xl font-bold text-blue-600 mt-1">
+                    -
+                </p>
+
             </div>
+
             <div class="bg-white rounded-2xl p-4 shadow border-l-4 border-yellow-400">
-                <p class="text-xs text-gray-400 uppercase font-semibold">Pending</p>
-                <p id="pendingTips" class="text-3xl font-bold text-yellow-500 mt-1">-</p>
+
+                <p class="text-xs text-gray-400 uppercase font-semibold">
+                    Pending
+                </p>
+
+                <p id="pendingTips"
+                   class="text-3xl font-bold text-yellow-500 mt-1">
+                    -
+                </p>
+
             </div>
+
             <div class="bg-white rounded-2xl p-4 shadow border-l-4 border-green-500">
-                <p class="text-xs text-gray-400 uppercase font-semibold">Converted</p>
-                <p id="convertedTips" class="text-3xl font-bold text-green-600 mt-1">-</p>
+
+                <p class="text-xs text-gray-400 uppercase font-semibold">
+                    Converted
+                </p>
+
+                <p id="convertedTips"
+                   class="text-3xl font-bold text-green-600 mt-1">
+                    -
+                </p>
+
             </div>
+
             <div class="bg-white rounded-2xl p-4 shadow border-l-4 border-red-400">
-                <p class="text-xs text-gray-400 uppercase font-semibold">Ignored</p>
-                <p id="ignoredTips" class="text-3xl font-bold text-red-500 mt-1">-</p>
+
+                <p class="text-xs text-gray-400 uppercase font-semibold">
+                    Ignored
+                </p>
+
+                <p id="ignoredTips"
+                   class="text-3xl font-bold text-red-500 mt-1">
+                    -
+                </p>
+
             </div>
+
         </div>
 
-        <!-- Table -->
+        <!-- TABLE -->
         <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+
+            <!-- TABLE HEADER -->
             <div class="bg-blue-600 px-6 py-4">
+
                 <h2 class="text-white font-bold text-lg flex items-center gap-2">
-                    <i class="bi bi-lightbulb-fill"></i> All Tips
+
+                    <i class="bi bi-lightbulb-fill"></i>
+
+                    All Tips
+
                 </h2>
+
             </div>
+
+            <!-- TABLE -->
             <div class="overflow-x-auto">
+
                 <table class="w-full">
+
                     <thead class="bg-blue-50 text-blue-700 text-xs uppercase">
+
                     <tr>
-                        <th class="px-4 py-3 text-left">ID</th>
+
+                        <!-- REMOVED ID COLUMN -->
+
+                        <th class="px-4 py-3 text-left">No.</th>
+
                         <th class="px-4 py-3 text-left">Title</th>
+
                         <th class="px-4 py-3 text-left">Description</th>
+
                         <th class="px-4 py-3 text-left">Location</th>
+
                         <th class="px-4 py-3 text-left">Priority</th>
+
                         <th class="px-4 py-3 text-left">Status</th>
+
                         <th class="px-4 py-3 text-left">Convert</th>
+
                         <th class="px-4 py-3 text-left">Ignore</th>
+
+                        <th class="px-4 py-3 text-left">Delete</th>
+
                     </tr>
+
                     </thead>
-                    <tbody id="tipData" class="divide-y divide-gray-100 text-sm">
-                    <tr><td colspan="8" class="px-6 py-10 text-center text-gray-400">
-                        <i class="bi bi-arrow-repeat animate-spin text-2xl block mb-2"></i>Loading tips...
-                    </td></tr>
+
+                    <tbody id="tipData"
+                           class="divide-y divide-gray-100 text-sm">
+
+                    <tr>
+
+                        <td colspan="9"
+                            class="px-6 py-10 text-center text-gray-400">
+
+                            <i class="bi bi-arrow-repeat animate-spin text-2xl block mb-2"></i>
+
+                            Loading tips...
+
+                        </td>
+
+                    </tr>
+
                     </tbody>
+
                 </table>
+
             </div>
+
         </div>
 
     </main>
+
 </div>
 
 <script>
+
     const statusColors = {
+
         PENDING: "bg-yellow-100 text-yellow-700",
+
         ASSIGNED: "bg-indigo-100 text-indigo-700",
+
         INCIDENT_CREATED: "bg-green-100 text-green-700",
+
         LINKED: "bg-blue-100 text-blue-700",
+
         IGNORED: "bg-red-100 text-red-700"
     };
 
     const priorityColors = {
+
         LOW: "bg-green-100 text-green-700",
+
         MEDIUM: "bg-yellow-100 text-yellow-700",
+
         HIGH: "bg-orange-100 text-orange-700",
+
         CRITICAL: "bg-red-100 text-red-700"
     };
 
+    // TOAST
     function showToast(msg, success = true) {
+
         const t = document.getElementById("toast");
-        t.className = `fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white font-semibold text-sm flex items-center gap-2 ${success ? "bg-green-500" : "bg-red-500"}`;
-        t.innerHTML = `<i class="bi bi-${success ? "check-circle" : "x-circle"}"></i> ${msg}`;
+
+        t.className =
+            `fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white font-semibold text-sm flex items-center gap-2 ${
+                success ? "bg-green-500" : "bg-red-500"
+            }`;
+
+        t.innerHTML =
+            `<i class="bi bi-${success ? "check-circle" : "x-circle"}"></i> ${msg}`;
+
         t.classList.remove("hidden");
-        setTimeout(() => t.classList.add("hidden"), 3000);
+
+        setTimeout(() => {
+
+            t.classList.add("hidden");
+
+        }, 3000);
     }
 
+    // HEADERS
     function getHeaders() {
-        return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+
+        return {
+
+            "Content-Type": "application/json",
+
+            "Authorization": `Bearer ${token}`
+        };
     }
 
+    // LOAD TIPS
     async function loadTips() {
+
         document.getElementById("tipData").innerHTML = `
-            <tr><td colspan="8" class="px-6 py-10 text-center text-gray-400">
-                <i class="bi bi-arrow-repeat animate-spin text-2xl block mb-2"></i>Loading...
-            </td></tr>`;
+
+            <tr>
+
+                <td colspan="9"
+                    class="px-6 py-10 text-center text-gray-400">
+
+                    <i class="bi bi-arrow-repeat animate-spin text-2xl block mb-2"></i>
+
+                    Loading...
+
+                </td>
+
+            </tr>
+        `;
+
         try {
-            const res = await fetch(`${BASE_URL}/tips/all`, { headers: getHeaders() });
-            if (res.status === 401) { localStorage.clear(); window.location.href = "login.html"; return; }
-            const tips = await res.json();
 
-            // Update stats
-            document.getElementById("totalTips").innerText = tips.length;
-            document.getElementById("pendingTips").innerText = tips.filter(t => t.status === "PENDING").length;
-            document.getElementById("convertedTips").innerText = tips.filter(t => t.status === "INCIDENT_CREATED").length;
-            document.getElementById("ignoredTips").innerText = tips.filter(t => t.status === "IGNORED").length;
+            const res = await fetch(`${BASE_URL}/tips/all`, {
 
-            const tbody = document.getElementById("tipData");
-            if (!tips.length) {
-                tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-8 text-center text-gray-400">No tips found.</td></tr>`;
+                headers: getHeaders()
+            });
+
+            if (res.status === 401) {
+
+                localStorage.clear();
+
+                window.location.href = "login.html";
+
                 return;
             }
 
-            tbody.innerHTML = tips.map(t => {
-                const isConverted = t.linkedIncidentId || t.status === "INCIDENT_CREATED";
-                const isIgnored = t.status === "IGNORED";
-                const sc = statusColors[t.status] || "bg-gray-100 text-gray-700";
-                const pc = priorityColors[t.priority] || "bg-gray-100 text-gray-700";
+            const tips = await res.json();
 
-                return `<tr class="hover:bg-gray-50 transition">
-                    <td class="px-4 py-3 font-mono text-gray-500">#${t.id}</td>
-                    <td class="px-4 py-3 font-semibold">${t.title || "—"}</td>
-                    <td class="px-4 py-3 text-gray-500 max-w-xs truncate">${t.description || "—"}</td>
-                    <td class="px-4 py-3 text-gray-500">${t.location || "—"}</td>
-                    <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-semibold ${pc}">${t.priority || "—"}</span></td>
-                    <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-semibold ${sc}">${t.status}</span></td>
-                    <td class="px-4 py-3">
-                        <button onclick="convertIncident(${t.id}, this)"
-                                ${isConverted ? "disabled" : ""}
+            // STATS
+            document.getElementById("totalTips").innerText =
+                tips.length;
+
+            document.getElementById("pendingTips").innerText =
+                tips.filter(t => t.status === "PENDING").length;
+
+            document.getElementById("convertedTips").innerText =
+                tips.filter(t => t.status === "INCIDENT_CREATED").length;
+
+            document.getElementById("ignoredTips").innerText =
+                tips.filter(t => t.status === "IGNORED").length;
+
+            const tbody = document.getElementById("tipData");
+
+            if (!tips.length) {
+
+                tbody.innerHTML = `
+
+                    <tr>
+
+                        <td colspan="9"
+                            class="px-6 py-8 text-center text-gray-400">
+
+                            No tips found.
+
+                        </td>
+
+                    </tr>
+                `;
+
+                return;
+            }
+
+            tbody.innerHTML = tips.map((t, index) => {
+
+                const isIgnored =
+                    t.status === "IGNORED";
+
+                const isConverted =
+                    t.linkedIncidentId ||
+                    t.status === "INCIDENT_CREATED";
+
+                const disableConvert =
+                    isIgnored || isConverted;
+
+                const sc =
+                    statusColors[t.status] ||
+                    "bg-gray-100 text-gray-700";
+
+                const pc =
+                    priorityColors[t.priority] ||
+                    "bg-gray-100 text-gray-700";
+
+                return `
+
+                    <tr class="hover:bg-gray-50 transition">
+
+                        <!-- SERIAL NUMBER -->
+                        <td class="px-4 py-3 font-semibold text-gray-600">
+                            ${index + 1}
+                        </td>
+
+                        <!-- TITLE -->
+                        <td class="px-4 py-3 font-semibold">
+                            ${t.title || "—"}
+                        </td>
+
+                        <!-- DESCRIPTION -->
+                        <td class="px-4 py-3 text-gray-500 max-w-xs truncate">
+                            ${t.description || "—"}
+                        </td>
+
+                        <!-- LOCATION -->
+                        <td class="px-4 py-3 text-gray-500">
+                            ${t.location || "—"}
+                        </td>
+
+                        <!-- PRIORITY -->
+                        <td class="px-4 py-3">
+
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold ${pc}">
+                                ${t.priority || "—"}
+                            </span>
+
+                        </td>
+
+                        <!-- STATUS -->
+                        <td class="px-4 py-3">
+
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold ${sc}">
+                                ${t.status}
+                            </span>
+
+                        </td>
+
+                        <!-- CONVERT -->
+                        <td class="px-4 py-3">
+
+                            <button
+                                onclick="convertIncident(${t.id}, this)"
+                                ${disableConvert ? "disabled" : ""}
+
                                 class="px-3 py-1 rounded-lg text-xs font-semibold transition
-                                ${isConverted ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600 text-white"}">
-                            <i class="bi bi-${isConverted ? "check" : "plus-circle"} mr-1"></i>
-                            ${isConverted ? "Converted" : "Convert"}
-                        </button>
-                    </td>
-                    <td class="px-4 py-3">
-                        <button onclick="ignoreTip(${t.id}, this)"
-                                ${isIgnored ? "disabled" : ""}
+                                ${
+                                    disableConvert
+                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                    : "bg-green-500 hover:bg-green-600 text-white"
+                                }">
+
+                                <i class="bi bi-${
+                                    isConverted
+                                    ? "check"
+                                    : isIgnored
+                                        ? "slash-circle"
+                                        : "plus-circle"
+                                } mr-1"></i>
+
+                                ${
+                                    isConverted
+                                    ? "Converted"
+                                    : isIgnored
+                                        ? "Disabled"
+                                        : "Convert"
+                                }
+
+                            </button>
+
+                        </td>
+
+                        <!-- IGNORE -->
+                        <td class="px-4 py-3">
+
+                            <button
+                                onclick="ignoreTip(${t.id}, this)"
+                                ${isIgnored || isConverted ? "disabled" : ""}
+
                                 class="px-3 py-1 rounded-lg text-xs font-semibold transition
-                                ${isIgnored ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-red-500 hover:bg-red-600 text-white"}">
-                            <i class="bi bi-${isIgnored ? "x" : "slash-circle"} mr-1"></i>
-                            ${isIgnored ? "Ignored" : "Ignore"}
-                        </button>
-                    </td>
-                </tr>`;
+                                ${
+                                    isIgnored || isConverted
+                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                    : "bg-red-500 hover:bg-red-600 text-white"
+                                }">
+
+                                <i class="bi bi-${
+                                    isIgnored
+                                    ? "x"
+                                    : "slash-circle"
+                                } mr-1"></i>
+
+                                ${
+                                    isIgnored
+                                    ? "Ignored"
+                                    : "Ignore"
+                                }
+
+                            </button>
+
+                        </td>
+
+                        <!-- DELETE -->
+                        <td class="px-4 py-3">
+
+                            <button
+                                onclick="deleteTip(${t.id}, this)"
+
+                                class="px-3 py-1 rounded-lg text-xs font-semibold transition bg-gray-700 hover:bg-black text-white">
+
+                                <i class="bi bi-trash mr-1"></i>
+
+                                Delete
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                `;
+
             }).join("");
 
         } catch (err) {
-            document.getElementById("tipData").innerHTML =
-                `<tr><td colspan="8" class="px-6 py-6 text-center text-red-400">Failed to load tips. Check connection.</td></tr>`;
+
+            document.getElementById("tipData").innerHTML = `
+
+                <tr>
+
+                    <td colspan="9"
+                        class="px-6 py-6 text-center text-red-400">
+
+                        Failed to load tips. Check connection.
+
+                    </td>
+
+                </tr>
+            `;
         }
     }
 
+    // CONVERT
     async function convertIncident(tipId, btn) {
+
         btn.disabled = true;
-        btn.innerHTML = `<i class="bi bi-arrow-repeat animate-spin mr-1"></i>Converting...`;
+
+        btn.innerHTML =
+            `<i class="bi bi-arrow-repeat animate-spin mr-1"></i>Converting...`;
+
         try {
-            const res = await fetch(`${BASE_URL}/tips/${tipId}/convert-to-incident`, {
-                method: "PUT", headers: getHeaders()
-            });
-            if (!res.ok) throw new Error(await res.text());
+
+            const res = await fetch(
+                `${BASE_URL}/tips/${tipId}/convert-to-incident`,
+                {
+                    method: "PUT",
+                    headers: getHeaders()
+                }
+            );
+
+            if (!res.ok) {
+
+                throw new Error(await res.text());
+            }
+
             showToast("Incident created successfully!");
+
             loadTips();
+
         } catch (err) {
+
             showToast("Failed to convert tip.", false);
+
             btn.disabled = false;
         }
     }
 
+    // IGNORE
     async function ignoreTip(tipId, btn) {
+
         btn.disabled = true;
-        btn.innerHTML = `<i class="bi bi-arrow-repeat animate-spin mr-1"></i>Ignoring...`;
+
+        btn.innerHTML =
+            `<i class="bi bi-arrow-repeat animate-spin mr-1"></i>Ignoring...`;
+
         try {
-            // ✅ FIXED — PUT not DELETE
-            await fetch(`${BASE_URL}/tips/${tipId}/ignore`, {
-                method: "PUT", headers: getHeaders()
-            });
+
+            await fetch(
+                `${BASE_URL}/tips/${tipId}/ignore`,
+                {
+                    method: "PUT",
+                    headers: getHeaders()
+                }
+            );
+
             showToast("Tip ignored.");
+
             loadTips();
+
         } catch (err) {
+
             showToast("Failed to ignore tip.", false);
+
             btn.disabled = false;
         }
     }
 
-    function logout() { localStorage.clear(); window.location.href = "login.html"; }
+    // DELETE
+    async function deleteTip(tipId, btn) {
 
+        if (!confirm("Are you sure you want to delete this tip?")) return;
+
+        btn.disabled = true;
+
+        btn.innerHTML =
+            `<i class="bi bi-arrow-repeat animate-spin mr-1"></i>Deleting...`;
+
+        try {
+
+            const res = await fetch(`${BASE_URL}/tips/${tipId}`, {
+
+                method: "DELETE",
+
+                headers: getHeaders()
+            });
+
+            if (!res.ok) {
+
+                throw new Error();
+            }
+
+            showToast("Tip deleted successfully!");
+
+            loadTips();
+
+        } catch (err) {
+
+            showToast("Failed to delete tip", false);
+
+            btn.disabled = false;
+
+            btn.innerHTML =
+                `<i class="bi bi-trash mr-1"></i>Delete`;
+        }
+    }
+
+    // LOGOUT
+    function logout() {
+
+        localStorage.clear();
+
+        window.location.href = "login.html";
+    }
+
+    // INITIAL LOAD
     loadTips();
+
 </script>
 
 </body>

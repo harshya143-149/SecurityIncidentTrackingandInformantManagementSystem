@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITIMS | Incident History</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 text-gray-900 min-h-screen flex">
+
+<script>
+
+    const BASE_URL = "http://localhost:8080";
+
+    const token =
+        localStorage.getItem("token");
+
+    const role =
+        localStorage.getItem("role");
+
+    const params =
+        new URLSearchParams(window.location.search);
+
+    const incidentId =
+        params.get("id");
+
+    function isTokenExpired(t) {
+
+        try {
+
+            const p =
+                JSON.parse(atob(t.split('.')[1]));
+
+            return p.exp * 1000 < Date.now();
+
+        } catch {
+
+            return true;
+        }
+    }
+
+    if (!token || isTokenExpired(token)) {
+
+        localStorage.clear();
+
+        window.location.href = "login.html";
+    }
+
+</script>
+
+<!-- SIDEBAR -->
+<aside class="w-64 bg-blue-900 text-white flex flex-col p-6 shadow-2xl">
+
+    <div class="mb-6">
+
+        <div class="flex items-center gap-3 mb-1">
+
+            <i class="bi bi-shield-lock-fill text-2xl text-blue-300"></i>
+
+            <h2 class="text-xl font-extrabold">
+                SITIMS
+            </h2>
+        </div>
+
+        <p class="text-blue-400 text-xs ml-9" id="panelLabel">
+            Panel
+        </p>
+    </div>
+
+    <nav class="space-y-1 flex-1" id="sidebarNav"></nav>
+
+    <button onclick="logout()"
+            class="flex items-center gap-3 p-3 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold mt-4">
+
+        <i class="bi bi-box-arrow-left"></i>
+
+        Logout
+    </button>
+</aside>
+
+<!-- MAIN -->
+<main class="flex-1 p-8 overflow-y-auto">
+
+    <!-- BACK -->
+    <button onclick="goBack()"
+            class="flex items-center gap-2 text-blue-600 hover:underline mb-6 text-sm font-semibold">
+
+        <i class="bi bi-arrow-left"></i>
+
+        Back
+    </button>
+
+    <!-- INCIDENT CARD -->
+    <div class="bg-white rounded-2xl shadow-md p-6 mb-8 border border-gray-100">
+
+        <div class="flex justify-between items-start">
+
+            <div>
+
+                <h1 class="text-2xl font-bold text-gray-800 mb-1"
+                    id="incidentTitle">
+
+                    Loading...
+                </h1>
+
+                <p class="text-gray-500 text-sm"
+                   id="incidentDesc">
+
+                    —
+                </p>
+            </div>
+
+            <div class="text-right">
+
+                <span id="incidentStatus"
+                      class="px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-600">
+
+                    —
+                </span>
+
+                <p class="text-xs text-gray-400 mt-2">
+
+                    Incident #
+                    <span id="incidentId"></span>
+                </p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-100">
+
+            <div>
+
+                <p class="text-xs text-gray-400 uppercase font-semibold">
+                    Location
+                </p>
+
+                <p class="text-sm font-medium text-gray-700"
+                   id="incidentLocation">
+
+                    —
+                </p>
+            </div>
+
+            <div>
+
+                <p class="text-xs text-gray-400 uppercase font-semibold">
+                    Severity
+                </p>
+
+                <p class="text-sm font-medium text-gray-700"
+                   id="incidentSeverity">
+
+                    —
+                </p>
+            </div>
+
+            <div>
+
+                <p class="text-xs text-gray-400 uppercase font-semibold">
+                    Reported By
+                </p>
+
+                <p class="text-sm font-medium text-gray-700"
+                   id="incidentReportedBy">
+
+                    —
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+
+        <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+
+            <i class="bi bi-clock-history text-blue-500"></i>
+
+            Incident Timeline
+
+            <span id="historyCount"
+                  class="ml-2 bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full font-semibold"></span>
+        </h2>
+
+        <!-- LOADING -->
+        <div id="loadingState"
+             class="text-center py-12 text-gray-400">
+
+            <i class="bi bi-arrow-repeat animate-spin text-3xl block mb-3"></i>
+
+            Loading timeline...
+        </div>
+
+        <!-- EMPTY -->
+        <div id="emptyState"
+             class="hidden text-center py-12">
+
+            <i class="bi bi-inbox text-4xl text-gray-300 block mb-3"></i>
+
+            <p class="text-gray-400">
+                No history found.
+            </p>
+        </div>
+
+        <!-- TIMELINE -->
+        <div id="timeline"
+             class="hidden relative">
+
+            <div class="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+
+            <div id="timelineItems"
+                 class="space-y-6"></div>
+        </div>
+    </div>
+</main>
+
+<script>
+
+    // SIDEBAR
+    function buildSidebar() {
+
+        const panelLabel =
+            document.getElementById("panelLabel");
+
+        const nav =
+            document.getElementById("sidebarNav");
+
+        if (role === "ADMIN") {
+
+            panelLabel.innerText = "Admin Panel";
+
+            nav.innerHTML = `
+                <a href="admin-dashboard.html"
+                   class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+                    <i class="bi bi-speedometer2"></i>
+                    Dashboard
+                </a>
+
+                <a href="admin-incidents.html"
+                   class="flex items-center gap-3 p-3 rounded-xl bg-blue-700 font-semibold">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Incidents
+                </a>
+            `;
+
+        } else if (role === "OFFICER") {
+
+            panelLabel.innerText = "Officer Panel";
+
+            nav.innerHTML = `
+                <a href="Officer-dashboard.html"
+                   class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+                    <i class="bi bi-speedometer2"></i>
+                    Dashboard
+                </a>
+
+                <a href="officer-incident-list.html"
+                   class="flex items-center gap-3 p-3 rounded-xl bg-blue-700 font-semibold">
+                    <i class="bi bi-list-check"></i>
+                    My Incidents
+                </a>
+            `;
+
+        } else {
+
+            panelLabel.innerText = "User Panel";
+
+            nav.innerHTML = `
+                <a href="dashboard.html"
+                   class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+                    <i class="bi bi-speedometer2"></i>
+                    Dashboard
+                </a>
+
+                <a href="my-incidents.html"
+                   class="flex items-center gap-3 p-3 rounded-xl bg-blue-700 font-semibold">
+                    <i class="bi bi-file-earmark-text"></i>
+                    My Incidents
+                </a>
+            `;
+        }
+    }
+
+    // LOAD INCIDENT
+    async function loadIncident() {
+
+        try {
+
+            const res = await fetch(
+                `${BASE_URL}/api/incidents/${incidentId}`,
+                {
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                }
+            );
+
+            const inc = await res.json();
+
+            document.getElementById("incidentTitle").innerText =
+                inc.title || "—";
+
+            document.getElementById("incidentDesc").innerText =
+                inc.description || "—";
+
+            document.getElementById("incidentId").innerText =
+                inc.id;
+
+            document.getElementById("incidentLocation").innerText =
+                inc.location || "—";
+
+            document.getElementById("incidentSeverity").innerText =
+                inc.severity || "—";
+
+            document.getElementById("incidentReportedBy").innerText =
+                inc.reportedBy || "—";
+
+            const statusEl =
+                document.getElementById("incidentStatus");
+
+            statusEl.innerText =
+                inc.status || "—";
+
+            statusEl.className =
+                "px-3 py-1 rounded-full text-sm font-semibold " +
+                getStatusClass(inc.status);
+
+        } catch (e) {
+
+            console.error(e);
+        }
+    }
+
+    // LOAD HISTORY
+    async function loadHistory() {
+
+        try {
+
+            const res = await fetch(
+                `${BASE_URL}/api/incidents/${incidentId}/history`,
+                {
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                }
+            );
+
+            const history =
+                await res.json();
+
+            document.getElementById("loadingState")
+                .classList.add("hidden");
+
+            if (!history || history.length === 0) {
+
+                document.getElementById("emptyState")
+                    .classList.remove("hidden");
+
+                return;
+            }
+
+            document.getElementById("timeline")
+                .classList.remove("hidden");
+
+            document.getElementById("historyCount").innerText =
+                history.length + " events";
+
+            const container =
+                document.getElementById("timelineItems");
+
+            container.innerHTML =
+                history.map(h => {
+
+                    let officerName = "";
+
+                    if (
+                        h.changedByName &&
+                        h.changedByName.trim() !== ""
+                    ) {
+
+                        officerName =
+                            h.changedByName;
+                    }
+
+                    return `
+
+                    <div class="relative flex gap-4 pl-14">
+
+                        <div class="absolute left-0 w-12 h-12 rounded-full flex items-center justify-center border-4 border-white shadow-md ${getActionBg(h.actionType)}">
+
+                            <i class="bi ${getActionIcon(h.actionType)} text-white text-lg"></i>
+                        </div>
+
+                        <div class="flex-1 bg-gray-50 rounded-2xl p-5 border border-gray-200">
+
+                            <div class="flex justify-between items-start mb-3">
+
+                                <div>
+
+                                    <span class="font-bold text-gray-800 text-base">
+                                        ${getActionLabel(h.actionType)}
+                                    </span>
+                                </div>
+
+                                <span class="text-xs text-gray-400">
+                                    ${formatDate(h.changedAt)}
+                                </span>
+                            </div>
+
+                            ${
+                                h.oldStatus && h.newStatus
+                                ?
+                                `
+                                <div class="flex items-center gap-2 mb-3">
+
+                                    <span class="px-2 py-1 rounded-lg text-xs font-semibold ${getStatusClass(h.oldStatus)}">
+                                        ${h.oldStatus}
+                                    </span>
+
+                                    <i class="bi bi-arrow-right"></i>
+
+                                    <span class="px-2 py-1 rounded-lg text-xs font-semibold ${getStatusClass(h.newStatus)}">
+                                        ${h.newStatus}
+                                    </span>
+                                </div>
+                                `
+                                :
+                                ""
+                            }
+
+                            <div class="flex items-center gap-2 text-sm text-gray-700 mb-2">
+
+                                <i class="bi bi-person-circle text-blue-500"></i>
+
+                                <span class="font-semibold">
+                                    ${officerName || "Officer"}
+                                </span>
+
+                            </div>
+
+                            ${
+                                h.remark
+                                ?
+                                `
+                                <div class="bg-white border border-gray-200 rounded-xl p-3 mt-2">
+
+                                    <p class="text-xs text-gray-400 uppercase font-semibold mb-1">
+                                        Remark
+                                    </p>
+
+                                    <p class="text-sm text-gray-700">
+                                        ${h.remark}
+                                    </p>
+                                </div>
+                                `
+                                :
+                                ""
+                            }
+
+                        </div>
+                    </div>
+                    `;
+                }).join("");
+
+        } catch (err) {
+
+            console.error(err);
+
+            document.getElementById("loadingState")
+                .classList.add("hidden");
+        }
+    }
+
+    // HELPERS
+    function getStatusClass(status) {
+
+        const map = {
+
+            PENDING:
+                "bg-yellow-100 text-yellow-700",
+
+            ASSIGNED:
+                "bg-indigo-100 text-indigo-700",
+
+            IN_PROGRESS:
+                "bg-blue-100 text-blue-700",
+
+            RESOLVED:
+                "bg-green-100 text-green-700",
+
+            CLOSED:
+                "bg-gray-200 text-gray-600",
+
+            REJECTED:
+                "bg-red-100 text-red-700"
+        };
+
+        return map[status] ||
+            "bg-gray-100 text-gray-600";
+    }
+
+    function getActionBg(action) {
+
+        const map = {
+
+            CREATED:
+                "bg-blue-500",
+
+            ASSIGNED:
+                "bg-indigo-500",
+
+            STATUS_CHANGED:
+                "bg-orange-500",
+
+            REMARKED:
+                "bg-purple-500"
+        };
+
+        return map[action] ||
+            "bg-gray-500";
+    }
+
+    function getActionIcon(action) {
+
+        const map = {
+
+            CREATED:
+                "bi-plus-circle-fill",
+
+            ASSIGNED:
+                "bi-person-check-fill",
+
+            STATUS_CHANGED:
+                "bi-arrow-repeat",
+
+            REMARKED:
+                "bi-chat-fill"
+        };
+
+        return map[action] ||
+            "bi-circle-fill";
+    }
+
+    function getActionLabel(action) {
+
+        const map = {
+
+            CREATED:
+                "Incident Created",
+
+            ASSIGNED:
+                "Officer Assigned",
+
+            STATUS_CHANGED:
+                "Status Updated",
+
+            REMARKED:
+                "Remark Added"
+        };
+
+        return map[action] ||
+            action;
+    }
+
+    function formatDate(dateStr) {
+
+        if (!dateStr)
+            return "—";
+
+        return new Date(dateStr)
+            .toLocaleString("en-IN");
+    }
+
+    function goBack() {
+
+        if (role === "ADMIN") {
+
+            window.location.href =
+                "admin-incidents.html";
+
+        } else if (role === "OFFICER") {
+
+            window.location.href =
+                "Officer-dashboard.html";
+
+        } else {
+
+            window.location.href =
+                "my-incidents.html";
+        }
+    }
+
+    function logout() {
+
+        localStorage.clear();
+
+        window.location.href =
+            "login.html";
+    }
+
+    // INIT
+    buildSidebar();
+
+    loadIncident();
+
+    loadHistory();
+
+</script>
+
+</body>
+</html>

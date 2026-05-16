@@ -1,17 +1,12 @@
 package com.harsh.SITIMS.service.impl;
 
 import com.harsh.SITIMS.dto.TipDTO;
-import com.harsh.SITIMS.entity.Informant;
-import com.harsh.SITIMS.entity.Tip;
-import com.harsh.SITIMS.entity.User;
-import com.harsh.SITIMS.entity.Incident;
-import com.harsh.SITIMS.repository.TipRepository;
-import com.harsh.SITIMS.repository.InformantRepository;
-import com.harsh.SITIMS.repository.UserRepository;
-import com.harsh.SITIMS.repository.IncidentRepository;
+import com.harsh.SITIMS.entity.*;
+import com.harsh.SITIMS.repository.*;
 import com.harsh.SITIMS.service.TipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,40 +24,51 @@ public class TipServiceImpl implements TipService {
     public TipDTO submitTip(TipDTO dto) {
 
         Tip tip = new Tip();
+
         tip.setTitle(dto.getTitle());
-        tip.setAnonymous(dto.isAnonymous());
-        tip.setLocation(dto.getLocation());
         tip.setDescription(dto.getDescription());
+        tip.setLocation(dto.getLocation());
         tip.setCategory(dto.getCategory());
         tip.setPriority(dto.getPriority());
-        tip.setStatus("PENDING");
+        tip.setAnonymous(dto.isAnonymous());
 
-        // If tip is not anonymous → save informant
-        if (!dto.isAnonymous() &&
-                dto.getInformantName() != null &&
-                !dto.getInformantName().isEmpty()) {
+        tip.setInformantUserId(dto.getInformantUserId());
+
+        if (!dto.isAnonymous()) {
 
             Informant informant = new Informant();
             informant.setName(dto.getInformantName());
             informant.setPhone(dto.getInformantContact());
-            informant = informantRepository.save(informant);
 
-            tip.setInformant(informant);
-            tip.setInformantName(informant.getName());
-            tip.setInformantContact(informant.getPhone());
+            informantRepository.save(informant);
+
+            tip.setInformantName(dto.getInformantName());
+            tip.setInformantContact(dto.getInformantContact());
 
         } else {
-            tip.setInformant(null);
             tip.setInformantName("Anonymous");
             tip.setInformantContact("-");
         }
 
-        Tip saved = tipRepository.save(tip);
-        return toDTO(saved);
+        tip.setStatus("PENDING");
+
+        return toDTO(tipRepository.save(tip));
+    }
+
+    @Override
+    public List<TipDTO> getTipsByUser(Long userId) {
+
+        return tipRepository.findAll()
+                .stream()
+                .filter(t -> t.getInformantUserId() != null
+                        && t.getInformantUserId().equals(userId))
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<TipDTO> getAllTips() {
+
         return tipRepository.findAll()
                 .stream()
                 .map(this::toDTO)
@@ -71,6 +77,7 @@ public class TipServiceImpl implements TipService {
 
     @Override
     public List<TipDTO> getTipsForOfficer(Long officerId) {
+
         User officer = userRepository.findById(officerId)
                 .orElseThrow(() -> new RuntimeException("Officer not found"));
 
@@ -92,8 +99,7 @@ public class TipServiceImpl implements TipService {
         tip.setAssignedOfficer(officer);
         tip.setStatus("ASSIGNED");
 
-        tipRepository.save(tip);
-        return toDTO(tip);
+        return toDTO(tipRepository.save(tip));
     }
 
     @Override
@@ -102,36 +108,25 @@ public class TipServiceImpl implements TipService {
         Tip tip = tipRepository.findById(tipId)
                 .orElseThrow(() -> new RuntimeException("Tip not found"));
 
-        // Prevent duplicate incident creation
-        if (tip.getLinkedIncident() != null) {
-            throw new RuntimeException("Incident already created for this tip");
-        }
-
-        // Prevent converting ignored tips
-        if ("IGNORED".equalsIgnoreCase(tip.getStatus())) {
-            throw new RuntimeException("Cannot create incident for an ignored tip");
-        }
-
-        // Create a minimal incident with location and severity
         Incident incident = new Incident();
         incident.setTitle(tip.getTitle());
         incident.setDescription(tip.getDescription());
-
-        // Map location and severity from tip
         incident.setLocation(tip.getLocation());
-        incident.setSeverity(tip.getPriority()); // Assuming priority maps to severity
+        incident.setSeverity(tip.getPriority());
+        incident.setStatus("PENDING");
+        incident.setReportedBy("TIP_SYSTEM");
 
         incident = incidentRepository.save(incident);
 
         tip.setLinkedIncident(incident);
         tip.setStatus("INCIDENT_CREATED");
 
-        tipRepository.save(tip);
-        return toDTO(tip);
+        return toDTO(tipRepository.save(tip));
     }
 
     @Override
     public TipDTO linkTipToIncident(Long tipId, Long incidentId) {
+
         Tip tip = tipRepository.findById(tipId)
                 .orElseThrow(() -> new RuntimeException("Tip not found"));
 
@@ -141,8 +136,7 @@ public class TipServiceImpl implements TipService {
         tip.setLinkedIncident(incident);
         tip.setStatus("LINKED");
 
-        tipRepository.save(tip);
-        return toDTO(tip);
+        return toDTO(tipRepository.save(tip));
     }
 
     @Override
@@ -153,10 +147,45 @@ public class TipServiceImpl implements TipService {
 
         tip.setStatus("IGNORED");
 
-        tipRepository.save(tip);
-        return toDTO(tip);
+        return toDTO(tipRepository.save(tip));
     }
 
+    // =========================
+    // FIXED UPDATE METHOD
+    // =========================
+    @Override
+    @Transactional
+    public TipDTO updateTip(Long tipId, TipDTO dto) {
+
+        Tip tip = tipRepository.findById(tipId)
+                .orElseThrow(() -> new RuntimeException("Tip not found"));
+
+        tip.setTitle(dto.getTitle());
+        tip.setDescription(dto.getDescription());
+        tip.setLocation(dto.getLocation());
+        tip.setCategory(dto.getCategory());
+        tip.setPriority(dto.getPriority());
+
+        Tip updatedTip = tipRepository.saveAndFlush(tip);
+
+        return toDTO(updatedTip);
+    }
+
+    // =========================
+    // DELETE TIP
+    // =========================
+    @Override
+    public void deleteTip(Long tipId) {
+
+        Tip tip = tipRepository.findById(tipId)
+                .orElseThrow(() -> new RuntimeException("Tip not found"));
+
+        tipRepository.delete(tip);
+    }
+
+    // =========================
+    // DTO MAPPER
+    // =========================
     private TipDTO toDTO(Tip t) {
 
         TipDTO dto = new TipDTO();
@@ -173,17 +202,7 @@ public class TipServiceImpl implements TipService {
 
         dto.setInformantName(t.getInformantName());
         dto.setInformantContact(t.getInformantContact());
-
-        // Officer mapping
-        if (t.getAssignedOfficer() != null) {
-            dto.setAssignedOfficerId(t.getAssignedOfficer().getId());
-            dto.setAssignedOfficerName(t.getAssignedOfficer().getName());
-        }
-
-        // Linked incident
-        if (t.getLinkedIncident() != null) {
-            dto.setLinkedIncidentId(t.getLinkedIncident().getId());
-        }
+        dto.setInformantUserId(t.getInformantUserId());
 
         return dto;
     }

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITIMS | Informant Dashboard</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+          rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 text-gray-900 min-h-screen flex">
+
+<script>
+
+    // BASE URL
+    const BASE_URL = "http://localhost:8080";
+
+    // TOKEN CHECK
+    function isTokenExpired(t) {
+
+        try {
+
+            const p = JSON.parse(atob(t.split('.')[1]));
+
+            return p.exp * 1000 < Date.now();
+
+        } catch {
+
+            return true;
+        }
+    }
+
+    // STORAGE
+    const token = localStorage.getItem("token");
+
+    const userId = localStorage.getItem("userId");
+
+    const userName = localStorage.getItem("name");
+
+    const userEmail = localStorage.getItem("emailFromLogin");
+
+    const userRole = localStorage.getItem("role");
+
+    // AUTH CHECK
+    if (!token || !userId || isTokenExpired(token)) {
+
+        localStorage.clear();
+
+        window.location.href = "login.html";
+    }
+
+    // ROLE CHECK
+    if (userRole === "ADMIN") {
+
+        window.location.href = "admin-dashboard.html";
+
+    } else if (userRole === "OFFICER") {
+
+        window.location.href = "Officer-dashboard.html";
+
+    } else if (userRole !== "INFORMANT") {
+
+        window.location.href = "dashboard.html";
+    }
+
+</script>
+
+<!-- SIDEBAR -->
+<aside class="w-64 bg-blue-900 text-white flex flex-col p-6 shadow-2xl">
+
+    <!-- LOGO -->
+    <div class="mb-6">
+
+        <div class="flex items-center gap-3 mb-1">
+
+            <i class="bi bi-shield-lock-fill text-2xl text-blue-300"></i>
+
+            <h2 class="text-xl font-extrabold">
+                SITIMS
+            </h2>
+
+        </div>
+
+        <p class="text-blue-400 text-xs ml-9">
+            Informant Panel
+        </p>
+
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav class="space-y-1 flex-1">
+
+        <!-- ACTIVE -->
+        <a href="informant-dashboard.html"
+           class="flex items-center gap-3 p-3 rounded-xl bg-blue-700 font-semibold">
+
+            <i class="bi bi-speedometer2"></i>
+
+            Dashboard
+        </a>
+
+        <a href="submit-tip.html"
+           class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+
+            <i class="bi bi-lightbulb"></i>
+
+            Submit Tip
+        </a>
+
+        <a href="my-tips.html"
+           class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+
+            <i class="bi bi-lightbulb-fill"></i>
+
+            My Tips
+        </a>
+
+        <a href="informant-edit-profile.html"
+           class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+
+            <i class="bi bi-pencil-square"></i>
+
+            Edit Profile
+        </a>
+
+    </nav>
+
+    <!-- LOGOUT -->
+    <button onclick="logout()"
+            class="flex items-center gap-3 p-3 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold mt-4">
+
+        <i class="bi bi-box-arrow-left"></i>
+
+        Logout
+    </button>
+
+</aside>
+
+<!-- MAIN -->
+<main class="flex-1 p-8 overflow-y-auto">
+
+    <!-- TOP -->
+    <div class="flex justify-between items-center mb-8">
+
+        <div>
+
+            <h1 class="text-3xl font-bold text-gray-800">
+
+                Welcome,
+                <span id="profileNameHeader" class="text-blue-600">
+                    Informant
+                </span>
+
+            </h1>
+
+            <p class="text-gray-500 text-sm mt-1">
+                Intelligence & confidential reporting dashboard
+            </p>
+
+        </div>
+
+        <div class="bg-white rounded-xl px-4 py-2 shadow text-sm text-gray-500 flex items-center gap-2">
+
+            <i class="bi bi-calendar3"></i>
+
+            <span id="currentDate"></span>
+
+        </div>
+
+    </div>
+
+    <!-- PROFILE -->
+    <div class="bg-white rounded-2xl shadow-md p-6 mb-8 border border-gray-100">
+
+        <h2 class="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
+
+            <i class="bi bi-person-circle text-blue-500"></i>
+
+            Informant Profile
+
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            <!-- NAME -->
+            <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+
+                <p class="text-xs text-gray-400 uppercase font-semibold mb-1">
+                    Full Name
+                </p>
+
+                <p id="profileName" class="text-gray-800 font-semibold">
+                    —
+                </p>
+
+            </div>
+
+            <!-- EMAIL -->
+            <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+
+                <p class="text-xs text-gray-400 uppercase font-semibold mb-1">
+                    Email
+                </p>
+
+                <p id="profileEmail" class="text-gray-800 font-semibold">
+                    —
+                </p>
+
+            </div>
+
+            <!-- ROLE -->
+            <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+
+                <p class="text-xs text-gray-400 uppercase font-semibold mb-1">
+                    Role
+                </p>
+
+                <span class="bg-purple-600 text-white text-xs px-3 py-1 rounded-full font-bold">
+                    INFORMANT
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- STATS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+
+        <!-- TOTAL -->
+        <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+
+            <div class="flex items-center justify-between">
+
+                <div>
+
+                    <p class="text-gray-500 text-sm">
+                        Total Tips
+                    </p>
+
+                    <h2 id="totalTips"
+                        class="text-2xl font-bold mt-1 text-gray-800">
+                        0
+                    </h2>
+
+                </div>
+
+                <div class="bg-blue-100 text-blue-600 p-3 rounded-xl">
+
+                    <i class="bi bi-lightbulb-fill text-xl"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- PENDING -->
+        <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+
+            <div class="flex items-center justify-between">
+
+                <div>
+
+                    <p class="text-gray-500 text-sm">
+                        Pending
+                    </p>
+
+                    <h2 id="pendingTips"
+                        class="text-2xl font-bold mt-1 text-yellow-500">
+                        0
+                    </h2>
+
+                </div>
+
+                <div class="bg-yellow-100 text-yellow-600 p-3 rounded-xl">
+
+                    <i class="bi bi-hourglass-split text-xl"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- APPROVED -->
+        <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+
+            <div class="flex items-center justify-between">
+
+                <div>
+
+                    <p class="text-gray-500 text-sm">
+                        Approved
+                    </p>
+
+                    <h2 id="approvedTips"
+                        class="text-2xl font-bold mt-1 text-green-600">
+                        0
+                    </h2>
+
+                </div>
+
+                <div class="bg-green-100 text-green-600 p-3 rounded-xl">
+
+                    <i class="bi bi-check-circle-fill text-xl"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- IGNORED -->
+        <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+
+            <div class="flex items-center justify-between">
+
+                <div>
+
+                    <p class="text-gray-500 text-sm">
+                        Ignored
+                    </p>
+
+                    <h2 id="ignoredTips"
+                        class="text-2xl font-bold mt-1 text-red-600">
+                        0
+                    </h2>
+
+                </div>
+
+                <div class="bg-red-100 text-red-600 p-3 rounded-xl">
+
+                    <i class="bi bi-x-circle-fill text-xl"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+
+        <!-- SUBMIT TIP -->
+        <a href="submit-tip.html"
+           class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition border border-gray-100">
+
+            <div class="flex items-center gap-4">
+
+                <div class="bg-purple-100 p-4 rounded-xl">
+
+                    <i class="bi bi-lightbulb-fill text-purple-600 text-2xl"></i>
+
+                </div>
+
+                <div>
+
+                    <h3 class="font-bold text-gray-800 text-lg">
+                        Submit Tip
+                    </h3>
+
+                    <p class="text-sm text-gray-500">
+                        Share confidential intelligence information
+                    </p>
+
+                </div>
+
+                <i class="bi bi-arrow-right-circle text-purple-400 text-2xl ml-auto"></i>
+
+            </div>
+
+        </a>
+
+        <!-- MY TIPS -->
+        <a href="my-tips.html"
+           class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition border border-gray-100">
+
+            <div class="flex items-center gap-4">
+
+                <div class="bg-pink-100 p-4 rounded-xl">
+
+                    <i class="bi bi-journal-text text-pink-600 text-2xl"></i>
+
+                </div>
+
+                <div>
+
+                    <h3 class="font-bold text-gray-800 text-lg">
+                        My Tips
+                    </h3>
+
+                    <p class="text-sm text-gray-500">
+                        View and manage submitted tips
+                    </p>
+
+                </div>
+
+                <i class="bi bi-arrow-right-circle text-pink-400 text-2xl ml-auto"></i>
+
+            </div>
+
+        </a>
+
+    </div>
+
+    <!-- STATUS -->
+    <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
+
+        <div class="flex items-center gap-4">
+
+            <div class="bg-green-100 p-4 rounded-xl">
+
+                <i class="bi bi-shield-check text-green-600 text-2xl"></i>
+
+            </div>
+
+            <div>
+
+                <h3 class="font-bold text-gray-800 text-lg">
+                    Account Status
+                </h3>
+
+                <p class="text-sm text-green-600 font-semibold">
+                    Active & Authenticated
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<script>
+
+    // DATE
+    document.getElementById("currentDate").innerText =
+        new Date().toLocaleDateString("en-IN", {
+
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+
+        });
+
+    // PROFILE
+    document.getElementById("profileNameHeader").innerText =
+        userName || "Informant";
+
+    document.getElementById("profileName").innerText =
+        userName || "—";
+
+    document.getElementById("profileEmail").innerText =
+        userEmail || "—";
+
+    // LOAD TIP STATS
+    async function loadStats() {
+
+        try {
+
+            const res = await fetch(`${BASE_URL}/tips/my?userId=${userId}`, {
+
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            });
+
+            const tips = await res.json();
+
+            document.getElementById("totalTips").innerText =
+                tips.length;
+
+            document.getElementById("pendingTips").innerText =
+                tips.filter(t => t.status === "PENDING").length;
+
+            document.getElementById("approvedTips").innerText =
+                tips.filter(t => t.status === "APPROVED").length;
+
+            document.getElementById("ignoredTips").innerText =
+                tips.filter(t => t.status === "IGNORED").length;
+
+        } catch (e) {
+
+            console.log("Failed to load stats");
+        }
+    }
+
+    // LOGOUT
+    function logout() {
+
+        localStorage.clear();
+
+        window.location.href = "login.html";
+    }
+
+    loadStats();
+
+</script>
+
+</body>
+</html>

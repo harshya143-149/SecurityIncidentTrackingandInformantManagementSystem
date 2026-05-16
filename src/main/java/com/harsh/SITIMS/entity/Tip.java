@@ -1,9 +1,8 @@
 package com.harsh.SITIMS.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -31,7 +30,6 @@ public class Tip {
 
     private String status;
 
-    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -42,15 +40,17 @@ public class Tip {
     @JoinColumn(name = "linked_incident_id")
     private Incident linkedIncident;
 
-    @Column(name = "informant_name")
     private String informantName;
-
-    @Column(name = "informant_contact")
     private String informantContact;
 
+    // 🔥 IMPORTANT FIELD (USER LINK)
+    @Column(name = "informant_user_id")
+    private Long informantUserId;
+
     @PrePersist
-    public void onCreate() {
+    public void prePersist() {
         this.createdAt = LocalDateTime.now();
+
         if (this.status == null) this.status = "PENDING";
         if (this.priority == null) this.priority = "LOW";
     }

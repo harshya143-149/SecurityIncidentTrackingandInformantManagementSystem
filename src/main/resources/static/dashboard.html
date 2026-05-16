@@ -4,249 +4,436 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SITIMS | Dashboard</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+          rel="stylesheet">
 </head>
 
 <body class="bg-gray-100 text-gray-900 min-h-screen flex">
 
 <script>
-    // ✅ STEP 1 — Define functions first
+
+    // BASE URL
     const BASE_URL = "http://localhost:8080";
 
+    // CHECK TOKEN
     function isTokenExpired(t) {
+
         try {
+
             const p = JSON.parse(atob(t.split('.')[1]));
+
             return p.exp * 1000 < Date.now();
-        } catch { return true; }
+
+        } catch {
+
+            return true;
+        }
     }
 
-    // ✅ STEP 2 — Read from localStorage
+    // LOCAL STORAGE
     const token = localStorage.getItem("token");
+
     const userId = localStorage.getItem("userId");
+
     const userName = localStorage.getItem("name");
+
     const userEmail = localStorage.getItem("emailFromLogin");
+
     const userRole = localStorage.getItem("role");
 
-    // ✅ STEP 3 — Check auth AFTER functions defined
+    // AUTH CHECK
     if (!token || !userId || isTokenExpired(token)) {
+
         localStorage.clear();
+
         window.location.href = "login.html";
     }
 
-    // ✅ STEP 4 — Role check — only USER should be here
-    // If admin or officer accidentally lands here — redirect them
+    // ROLE CHECK
     if (userRole === "ADMIN") {
+
         window.location.href = "admin-dashboard.html";
+
     } else if (userRole === "OFFICER") {
+
         window.location.href = "Officer-dashboard.html";
     }
+
 </script>
 
-<!-- Sidebar -->
+<!-- SIDEBAR -->
 <aside class="w-64 bg-blue-900 text-white flex flex-col p-6 shadow-2xl">
+
+    <!-- LOGO -->
     <div class="mb-6">
+
         <div class="flex items-center gap-3 mb-1">
+
             <i class="bi bi-shield-lock-fill text-2xl text-blue-300"></i>
-            <h2 class="text-xl font-extrabold">SITIMS</h2>
+
+            <h2 class="text-xl font-extrabold">
+                SITIMS
+            </h2>
+
         </div>
-        <p class="text-blue-400 text-xs ml-9">User Panel</p>
+
+        <p class="text-blue-400 text-xs ml-9">
+            User Panel
+        </p>
+
     </div>
 
+    <!-- NAVIGATION -->
     <nav class="space-y-1 flex-1">
+
+        <!-- ACTIVE -->
         <a href="dashboard.html"
            class="flex items-center gap-3 p-3 rounded-xl bg-blue-700 font-semibold">
-            <i class="bi bi-speedometer2"></i> Dashboard
+
+            <i class="bi bi-speedometer2"></i>
+
+            Dashboard
         </a>
+
         <a href="create-incident.html"
            class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
-            <i class="bi bi-plus-circle"></i> Report Incident
+
+            <i class="bi bi-plus-circle"></i>
+
+            Report Incident
         </a>
+
         <a href="my-incidents.html"
            class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
-            <i class="bi bi-file-earmark-text"></i> My Incidents
+
+            <i class="bi bi-file-earmark-text"></i>
+
+            My Incidents
         </a>
-        <a href="submit-tip.html"
-           class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
-            <i class="bi bi-lightbulb"></i> Submit Tip
-        </a>
+
+
+
         <a href="user-edit-profile.html"
            class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
-            <i class="bi bi-pencil-square"></i> Edit Profile
+
+            <i class="bi bi-pencil-square"></i>
+
+            Edit Profile
         </a>
+
     </nav>
 
+    <!-- LOGOUT -->
     <button onclick="logout()"
-            class="flex items-center gap-3 p-3 rounded-xl bg-red-600 hover:bg-red-700
-                   transition font-semibold mt-4">
-        <i class="bi bi-box-arrow-left"></i> Logout
+            class="flex items-center gap-3 p-3 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold mt-4">
+
+        <i class="bi bi-box-arrow-left"></i>
+
+        Logout
     </button>
+
 </aside>
 
-<!-- Main -->
+<!-- MAIN -->
 <main class="flex-1 p-8 overflow-y-auto">
 
-    <!-- Top Bar -->
+    <!-- TOP BAR -->
     <div class="flex justify-between items-center mb-8">
+
         <div>
+
             <h1 class="text-3xl font-bold text-gray-800">
-                Welcome, <span id="profileNameHeader" class="text-blue-600">User</span>!
+
+                Welcome,
+                <span id="profileNameHeader" class="text-blue-600">
+                    User
+                </span>!
+
             </h1>
-            <p class="text-gray-500 text-sm mt-1">Here is your SITIMS dashboard</p>
+
+            <p class="text-gray-500 text-sm mt-1">
+                Here is your SITIMS dashboard
+            </p>
+
         </div>
+
         <div class="bg-white rounded-xl px-4 py-2 shadow text-sm text-gray-500 flex items-center gap-2">
+
             <i class="bi bi-calendar3"></i>
+
             <span id="currentDate"></span>
+
         </div>
+
     </div>
 
-    <!-- Profile Card -->
+    <!-- PROFILE CARD -->
     <div class="bg-white rounded-2xl shadow-md p-6 mb-8 border border-gray-100">
+
         <h2 class="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
-            <i class="bi bi-person-circle text-blue-500"></i> My Profile
+
+            <i class="bi bi-person-circle text-blue-500"></i>
+
+            My Profile
+
         </h2>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            <!-- NAME -->
             <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
-                <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Full Name</p>
-                <p id="profileName" class="text-gray-800 font-semibold">—</p>
+
+                <p class="text-xs text-gray-400 uppercase font-semibold mb-1">
+                    Full Name
+                </p>
+
+                <p id="profileName" class="text-gray-800 font-semibold">
+                    —
+                </p>
+
             </div>
+
+            <!-- EMAIL -->
             <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
-                <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Email</p>
-                <p id="profileEmail" class="text-gray-800 font-semibold">—</p>
+
+                <p class="text-xs text-gray-400 uppercase font-semibold mb-1">
+                    Email
+                </p>
+
+                <p id="profileEmail" class="text-gray-800 font-semibold">
+                    —
+                </p>
+
             </div>
+
+            <!-- ROLE -->
             <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
-                <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Role</p>
+
+                <p class="text-xs text-gray-400 uppercase font-semibold mb-1">
+                    Role
+                </p>
+
                 <span class="bg-green-500 text-white text-xs px-3 py-1 rounded-full font-bold">
                     USER
                 </span>
+
             </div>
+
         </div>
+
     </div>
 
-    <!-- Quick Actions -->
+    <!-- QUICK ACTIONS -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
 
+        <!-- REPORT INCIDENT -->
         <a href="create-incident.html"
-           class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition
-                  hover:-translate-y-1 transform border border-gray-100 cursor-pointer">
+           class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition hover:-translate-y-1 transform border border-gray-100 cursor-pointer">
+
             <div class="flex items-center gap-4">
+
                 <div class="bg-blue-100 p-4 rounded-xl">
+
                     <i class="bi bi-journal-plus text-blue-600 text-2xl"></i>
-                </div>
-                <div>
-                    <h3 class="font-bold text-gray-800 text-lg">Report Incident</h3>
-                    <p class="text-sm text-gray-500">Submit a new security incident</p>
-                </div>
-                <i class="bi bi-arrow-right-circle text-blue-400 text-2xl ml-auto"></i>
-            </div>
-        </a>
 
-        <a href="my-incidents.html"
-           class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition
-                  hover:-translate-y-1 transform border border-gray-100 cursor-pointer">
-            <div class="flex items-center gap-4">
-                <div class="bg-yellow-100 p-4 rounded-xl">
-                    <i class="bi bi-file-earmark-text-fill text-yellow-600 text-2xl"></i>
                 </div>
-                <div>
-                    <h3 class="font-bold text-gray-800 text-lg">My Incidents</h3>
-                    <p class="text-sm text-gray-500">Track your reported incidents</p>
-                </div>
-                <i class="bi bi-arrow-right-circle text-yellow-400 text-2xl ml-auto"></i>
-            </div>
-        </a>
 
-        <a href="submit-tip.html"
-           class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition
-                  hover:-translate-y-1 transform border border-gray-100 cursor-pointer">
-            <div class="flex items-center gap-4">
-                <div class="bg-purple-100 p-4 rounded-xl">
-                    <i class="bi bi-lightbulb-fill text-purple-600 text-2xl"></i>
-                </div>
                 <div>
-                    <h3 class="font-bold text-gray-800 text-lg">Submit Tip</h3>
-                    <p class="text-sm text-gray-500">Report anonymously</p>
-                </div>
-                <i class="bi bi-arrow-right-circle text-purple-400 text-2xl ml-auto"></i>
-            </div>
-        </a>
 
-        <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
-            <div class="flex items-center gap-4">
-                <div class="bg-green-100 p-4 rounded-xl">
-                    <i class="bi bi-shield-check text-green-600 text-2xl"></i>
-                </div>
-                <div>
-                    <h3 class="font-bold text-gray-800 text-lg">Account Status</h3>
-                    <p class="text-sm text-green-500 font-semibold flex items-center gap-1">
-                        <i class="bi bi-circle-fill text-xs"></i> Active & Authenticated
+                    <h3 class="font-bold text-gray-800 text-lg">
+                        Report Incident
+                    </h3>
+
+                    <p class="text-sm text-gray-500">
+                        Submit a new security incident
                     </p>
+
                 </div>
+
+                <i class="bi bi-arrow-right-circle text-blue-400 text-2xl ml-auto"></i>
+
             </div>
+
+        </a>
+
+        <!-- MY INCIDENTS -->
+        <a href="my-incidents.html"
+           class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition hover:-translate-y-1 transform border border-gray-100 cursor-pointer">
+
+            <div class="flex items-center gap-4">
+
+                <div class="bg-yellow-100 p-4 rounded-xl">
+
+                    <i class="bi bi-file-earmark-text-fill text-yellow-600 text-2xl"></i>
+
+                </div>
+
+                <div>
+
+                    <h3 class="font-bold text-gray-800 text-lg">
+                        My Incidents
+                    </h3>
+
+                    <p class="text-sm text-gray-500">
+                        Track your reported incidents
+                    </p>
+
+                </div>
+
+                <i class="bi bi-arrow-right-circle text-yellow-400 text-2xl ml-auto"></i>
+
+            </div>
+
+        </a>
+
+
+
+        <!-- ACCOUNT STATUS -->
+        <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 md:col-span-2">
+
+            <div class="flex items-center gap-4">
+
+                <div class="bg-green-100 p-4 rounded-xl">
+
+                    <i class="bi bi-shield-check text-green-600 text-2xl"></i>
+
+                </div>
+
+                <div>
+
+                    <h3 class="font-bold text-gray-800 text-lg">
+                        Account Status
+                    </h3>
+
+                    <p class="text-sm text-green-500 font-semibold flex items-center gap-1">
+
+                        <i class="bi bi-circle-fill text-xs"></i>
+
+                        Active & Authenticated
+
+                    </p>
+
+                </div>
+
+            </div>
+
         </div>
 
     </div>
 
-    <!-- User Guide -->
+    <!-- USER GUIDE -->
     <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+
         <h2 class="text-lg font-bold text-gray-700 mb-6 flex items-center gap-2">
-            <i class="bi bi-book text-blue-500"></i> User Guide
+
+            <i class="bi bi-book text-blue-500"></i>
+
+            User Guide
+
         </h2>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-2xl
-                        text-center border border-blue-200 hover:shadow-md transition">
+            <!-- REGISTER -->
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-2xl text-center border border-blue-200 hover:shadow-md transition">
+
                 <i class="bi bi-person-plus-fill text-blue-600 text-4xl block mb-3"></i>
-                <h3 class="font-semibold text-gray-800 mb-1">Register</h3>
-                <p class="text-gray-600 text-xs">Create an account to start using SITIMS</p>
+
+                <h3 class="font-semibold text-gray-800 mb-1">
+                    Register
+                </h3>
+
+                <p class="text-gray-600 text-xs">
+                    Create an account to start using SITIMS
+                </p>
+
             </div>
 
-            <div class="bg-gradient-to-br from-green-50 to-green-100 p-5 rounded-2xl
-                        text-center border border-green-200 hover:shadow-md transition">
+            <!-- REPORT -->
+            <div class="bg-gradient-to-br from-green-50 to-green-100 p-5 rounded-2xl text-center border border-green-200 hover:shadow-md transition">
+
                 <i class="bi bi-journal-plus text-green-600 text-4xl block mb-3"></i>
-                <h3 class="font-semibold text-gray-800 mb-1">Report Incident</h3>
-                <p class="text-gray-600 text-xs">Submit incidents with full details</p>
+
+                <h3 class="font-semibold text-gray-800 mb-1">
+                    Report Incident
+                </h3>
+
+                <p class="text-gray-600 text-xs">
+                    Submit incidents with full details
+                </p>
+
             </div>
 
-            <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 p-5 rounded-2xl
-                        text-center border border-yellow-200 hover:shadow-md transition">
+            <!-- TRACK -->
+            <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 p-5 rounded-2xl text-center border border-yellow-200 hover:shadow-md transition">
+
                 <i class="bi bi-file-earmark-text-fill text-yellow-600 text-4xl block mb-3"></i>
-                <h3 class="font-semibold text-gray-800 mb-1">Track Status</h3>
-                <p class="text-gray-600 text-xs">Monitor your incidents in real time</p>
+
+                <h3 class="font-semibold text-gray-800 mb-1">
+                    Track Status
+                </h3>
+
+                <p class="text-gray-600 text-xs">
+                    Monitor your incidents in real time
+                </p>
+
             </div>
 
-            <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-2xl
-                        text-center border border-purple-200 hover:shadow-md transition">
+            <!-- HELP -->
+            <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-2xl text-center border border-purple-200 hover:shadow-md transition">
+
                 <i class="bi bi-question-circle-fill text-purple-600 text-4xl block mb-3"></i>
-                <h3 class="font-semibold text-gray-800 mb-1">Get Help</h3>
-                <p class="text-gray-600 text-xs">Access support and FAQs anytime</p>
+
+                <h3 class="font-semibold text-gray-800 mb-1">
+                    Get Help
+                </h3>
+
+                <p class="text-gray-600 text-xs">
+                    Access support and FAQs anytime
+                </p>
+
             </div>
 
         </div>
+
     </div>
 
 </main>
 
 <script>
-    // ✅ Set date
+
+    // DATE
     document.getElementById("currentDate").innerText =
         new Date().toLocaleDateString("en-IN", {
+
             weekday: "long",
             year: "numeric",
             month: "long",
             day: "numeric"
+
         });
 
-    // ✅ Load from localStorage — NO API call needed
-    document.getElementById("profileNameHeader").innerText = userName || "User";
-    document.getElementById("profileName").innerText = userName || "—";
-    document.getElementById("profileEmail").innerText = userEmail || "—";
+    // PROFILE
+    document.getElementById("profileNameHeader").innerText =
+        userName || "User";
 
-    // ✅ Logout
+    document.getElementById("profileName").innerText =
+        userName || "—";
+
+    document.getElementById("profileEmail").innerText =
+        userEmail || "—";
+
+    // LOGOUT
     function logout() {
+
         localStorage.clear();
+
         window.location.href = "login.html";
     }
+
 </script>
 
 </body>

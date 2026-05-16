@@ -8,36 +8,31 @@ import java.util.List;
 
 public interface IncidentService {
 
-    // CREATE INCIDENT
     Incident createIncident(IncidentDTO dto, String username);
 
-    // GET ALL INCIDENTS
     List<Incident> getAllIncidents();
 
-    // GET INCIDENTS CREATED BY A USER
     List<Incident> getMyIncidents(String username);
 
-    // GET INCIDENTS ASSIGNED TO AN OFFICER
     List<Incident> getIncidentsByOfficer(Long officerId);
 
-    // GET INCIDENT BY ID
     Incident getIncidentById(Long id);
 
-    // UPDATE INCIDENT
-    Incident updateIncident(Long id, Incident updated);
+    Incident updateIncident(Long id, IncidentDTO dto);
 
-    // UPDATE STATUS BY OFFICER
-    void updateStatusByOfficer(Long id, String status, String remark);
+    // ✅ UPDATED
+    void updateStatusByOfficer(
+            Long id,
+            String status,
+            String remark,
+            String officerEmail
+    );
 
-    // ASSIGN OFFICER TO INCIDENT
     String assignOfficer(AssignOfficerDTO dto);
 
-    // GET INCIDENTS FOR OFFICER (alternative)
     List<Incident> getIncidentsForOfficer(Long officerId);
 
-    // GET INCIDENTS BY USER ID
     List<Incident> getIncidentsByUserId(Long userId);
 
-    // DELETE INCIDENT
     void deleteIncident(Long id);
 }

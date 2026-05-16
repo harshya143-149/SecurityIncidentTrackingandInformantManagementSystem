@@ -4,185 +4,460 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SITIMS | Manage Users</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 </head>
+
 <body class="bg-gray-100 text-gray-900 min-h-screen">
 
 <script>
+
     const BASE_URL = "http://localhost:8080";
+
     const token = localStorage.getItem("token");
+
     const role = localStorage.getItem("role");
 
     function isTokenExpired(t) {
-        try { const p = JSON.parse(atob(t.split('.')[1])); return p.exp * 1000 < Date.now(); }
-        catch { return true; }
+
+        try {
+
+            const p = JSON.parse(atob(t.split('.')[1]));
+
+            return p.exp * 1000 < Date.now();
+
+        } catch {
+
+            return true;
+        }
     }
+
     if (!token || role !== "ADMIN" || isTokenExpired(token)) {
-        localStorage.clear(); window.location.href = "login.html";
+
+        localStorage.clear();
+
+        window.location.href = "login.html";
     }
+
 </script>
 
 <div class="flex min-h-screen">
 
     <!-- Sidebar -->
     <aside class="w-64 bg-blue-900 text-white flex flex-col p-6 shadow-2xl">
+
         <div class="mb-6">
+
             <div class="flex items-center gap-3 mb-1">
+
                 <i class="bi bi-shield-lock-fill text-2xl text-blue-300"></i>
+
                 <h2 class="text-xl font-extrabold">SITIMS</h2>
+
             </div>
-            <p class="text-blue-400 text-xs ml-9">Admin Panel</p>
+
+            <p class="text-blue-400 text-xs ml-9">
+                Admin Panel
+            </p>
+
         </div>
+
         <nav class="space-y-1 flex-1">
-            <a href="admin-dashboard.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-speedometer2"></i> Dashboard</a>
-            <a href="admin-incidents.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-exclamation-triangle"></i> Incidents</a>
-            <a href="admin-officers.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-person-badge"></i> Officers</a>
-            <a href="admin-user.html" class="flex items-center gap-3 p-3 rounded-xl bg-blue-700 font-semibold"><i class="bi bi-people"></i> Users</a>
-            <a href="admin-informant.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-incognito"></i> Informants</a>
-            <a href="admin-tips.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-lightbulb"></i> Tips</a>
+
+            <a href="admin-dashboard.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+
+                <i class="bi bi-speedometer2"></i>
+
+                Dashboard
+
+            </a>
+
+            <a href="admin-incidents.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+
+                <i class="bi bi-exclamation-triangle"></i>
+
+                Incidents
+
+            </a>
+
+            <a href="admin-officers.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+
+                <i class="bi bi-person-badge"></i>
+
+                Officers
+
+            </a>
+
+            <a href="admin-user.html"
+               class="flex items-center gap-3 p-3 rounded-xl bg-blue-700 font-semibold">
+
+                <i class="bi bi-people"></i>
+
+                Users
+
+            </a>
+
+            <a href="admin-informant.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+
+                <i class="bi bi-incognito"></i>
+
+                Informants
+
+            </a>
+
+            <a href="admin-tips.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
+
+                <i class="bi bi-lightbulb"></i>
+
+                Tips
+
+            </a>
+
         </nav>
-        <button onclick="logout()" class="flex items-center gap-3 p-3 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold mt-4">
-            <i class="bi bi-box-arrow-left"></i> Logout
+
+        <button onclick="logout()"
+                class="flex items-center gap-3 p-3 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold mt-4">
+
+            <i class="bi bi-box-arrow-left"></i>
+
+            Logout
+
         </button>
+
     </aside>
 
     <!-- Main -->
     <main class="flex-1 p-8">
 
         <div class="flex justify-between items-center mb-8">
+
             <div>
-                <h1 class="text-3xl font-bold text-gray-800">Manage Users</h1>
-                <p class="text-gray-500 text-sm mt-1">View, update and manage all system users</p>
+
+                <h1 class="text-3xl font-bold text-gray-800">
+                    Manage Users
+                </h1>
+
+                <p class="text-gray-500 text-sm mt-1">
+                    View, update and manage all system users
+                </p>
+
             </div>
+
             <a href="admin-user-update.html"
                class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold transition shadow">
-                <i class="bi bi-plus-circle"></i> Add User
+
+                <i class="bi bi-plus-circle"></i>
+
+                Add User
+
             </a>
+
         </div>
 
         <!-- Toast -->
-        <div id="toast" class="hidden fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white font-semibold text-sm flex items-center gap-2"></div>
+        <div id="toast"
+             class="hidden fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white font-semibold text-sm flex items-center gap-2"></div>
 
         <!-- Table -->
         <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+
             <div class="bg-blue-600 px-6 py-4 flex justify-between items-center">
+
                 <h2 class="text-white font-bold text-lg flex items-center gap-2">
-                    <i class="bi bi-people-fill"></i> All Users
+
+                    <i class="bi bi-people-fill"></i>
+
+                    All Users
+
                 </h2>
-                <span id="countBadge" class="bg-blue-500 text-white text-xs px-3 py-1 rounded-full">Loading...</span>
+
+                <span id="countBadge"
+                      class="bg-blue-500 text-white text-xs px-3 py-1 rounded-full">
+
+                    Loading...
+
+                </span>
+
             </div>
+
             <div class="overflow-x-auto">
+
                 <table class="w-full">
+
                     <thead class="bg-blue-50 text-blue-700 text-xs uppercase">
+
                     <tr>
-                        <th class="px-6 py-3 text-left">ID</th>
+
+                        <th class="px-6 py-3 text-left">No.</th>
+
                         <th class="px-6 py-3 text-left">Name</th>
+
                         <th class="px-6 py-3 text-left">Email</th>
+
                         <th class="px-6 py-3 text-left">Role</th>
+
                         <th class="px-6 py-3 text-left">Actions</th>
+
                     </tr>
+
                     </thead>
-                    <tbody id="tbody" class="divide-y divide-gray-100 text-sm">
-                    <tr><td colspan="5" class="px-6 py-10 text-center text-gray-400">
-                        <i class="bi bi-arrow-repeat animate-spin text-2xl block mb-2"></i>Loading users...
-                    </td></tr>
+
+                    <tbody id="tbody"
+                           class="divide-y divide-gray-100 text-sm">
+
+                    <tr>
+
+                        <td colspan="5"
+                            class="px-6 py-10 text-center text-gray-400">
+
+                            <i class="bi bi-arrow-repeat animate-spin text-2xl block mb-2"></i>
+
+                            Loading users...
+
+                        </td>
+
+                    </tr>
+
                     </tbody>
+
                 </table>
+
             </div>
+
         </div>
 
     </main>
+
 </div>
 
 <script>
+
     const roleColors = {
+
         ADMIN: "bg-red-100 text-red-700",
+
         OFFICER: "bg-indigo-100 text-indigo-700",
+
         USER: "bg-green-100 text-green-700"
     };
 
     function showToast(msg, success = true) {
+
         const t = document.getElementById("toast");
-        t.className = `fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white font-semibold text-sm flex items-center gap-2 ${success ? "bg-green-500" : "bg-red-500"}`;
-        t.innerHTML = `<i class="bi bi-${success ? "check-circle" : "x-circle"}"></i> ${msg}`;
+
+        t.className =
+            `fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white font-semibold text-sm flex items-center gap-2 ${success ? "bg-green-500" : "bg-red-500"}`;
+
+        t.innerHTML =
+            `<i class="bi bi-${success ? "check-circle" : "x-circle"}"></i> ${msg}`;
+
         t.classList.remove("hidden");
+
         setTimeout(() => t.classList.add("hidden"), 3000);
     }
 
     async function loadUsers() {
+
         try {
-            const res = await fetch(`${BASE_URL}/api/admin/users/all`, {
-                headers: { "Authorization": "Bearer " + token }
-            });
-            if (res.status === 401) { localStorage.clear(); window.location.href = "login.html"; return; }
-            const users = await res.json();
 
-            document.getElementById("countBadge").innerText = `${users.length} users`;
-            const tbody = document.getElementById("tbody");
+            const res = await fetch(
+                `${BASE_URL}/api/admin/users/all`,
+                {
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                }
+            );
 
-            if (!users.length) {
-                tbody.innerHTML = `
-                    <tr><td colspan="5" class="px-6 py-10 text-center">
-                        <i class="bi bi-people text-4xl text-gray-300 block mb-3"></i>
-                        <p class="text-gray-400">No users found.</p>
-                    </td></tr>`;
+            if (res.status === 401) {
+
+                localStorage.clear();
+
+                window.location.href = "login.html";
+
                 return;
             }
 
-            tbody.innerHTML = users.map(u => {
-                const rc = roleColors[u.role] || "bg-gray-100 text-gray-700";
+           let users = await res.json();
+
+users = users.filter(u =>
+    u.role === "USER" || u.role === "ADMIN"
+);
+
+            document.getElementById("countBadge").innerText =
+                `${users.length} users`;
+
+            const tbody = document.getElementById("tbody");
+
+            if (!users.length) {
+
+                tbody.innerHTML = `
+
+                    <tr>
+
+                        <td colspan="5"
+                            class="px-6 py-10 text-center">
+
+                            <i class="bi bi-people text-4xl text-gray-300 block mb-3"></i>
+
+                            <p class="text-gray-400">
+
+                                No users found.
+
+                            </p>
+
+                        </td>
+
+                    </tr>
+                `;
+
+                return;
+            }
+
+            tbody.innerHTML = users.map((u, index) => {
+
+                const rc =
+                    roleColors[u.role] || "bg-gray-100 text-gray-700";
+
                 return `
+
                 <tr class="hover:bg-gray-50 transition">
-                    <td class="px-6 py-4 font-mono text-gray-500">#${u.id}</td>
-                    <td class="px-6 py-4 font-semibold">${u.name}</td>
-                    <td class="px-6 py-4 text-gray-600">${u.email}</td>
-                    <td class="px-6 py-4">
-                        <span class="px-2 py-1 rounded-full text-xs font-semibold ${rc}">${u.role}</span>
+
+                    <td class="px-6 py-4 font-mono text-gray-500">
+
+                        ${index + 1}
+
                     </td>
+
+                    <td class="px-6 py-4 font-semibold">
+
+                        ${u.name}
+
+                    </td>
+
+                    <td class="px-6 py-4 text-gray-600">
+
+                        ${u.email}
+
+                    </td>
+
                     <td class="px-6 py-4">
+
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold ${rc}">
+
+                            ${u.role}
+
+                        </span>
+
+                    </td>
+
+                    <td class="px-6 py-4">
+
                         <div class="flex gap-2">
-                            <button onclick="editUser(${u.id})"
-                                    class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-semibold transition">
-                                <i class="bi bi-pencil mr-1"></i>Update
+
+                            <button
+                                onclick="editUser(${u.id})"
+                                class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-semibold transition">
+
+                                <i class="bi bi-pencil mr-1"></i>
+
+                                Update
+
                             </button>
-                            <button onclick="deleteUser(${u.id})"
-                                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs font-semibold transition">
-                                <i class="bi bi-trash mr-1"></i>Delete
+
+                            <button
+                                onclick="deleteUser(${u.id})"
+                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs font-semibold transition">
+
+                                <i class="bi bi-trash mr-1"></i>
+
+                                Delete
+
                             </button>
+
                         </div>
+
                     </td>
-                </tr>`;
+
+                </tr>
+
+                `;
+
             }).join("");
 
         } catch (err) {
-            document.getElementById("tbody").innerHTML =
-                `<tr><td colspan="5" class="px-6 py-6 text-center text-red-400">Failed to load users.</td></tr>`;
+
+            document.getElementById("tbody").innerHTML = `
+
+                <tr>
+
+                    <td colspan="5"
+                        class="px-6 py-6 text-center text-red-400">
+
+                        Failed to load users.
+
+                    </td>
+
+                </tr>
+            `;
         }
     }
 
     function editUser(id) {
-        window.location.href = `admin-user-update.html?id=${id}`;
+
+        window.location.href =
+            `admin-user-update.html?id=${id}`;
     }
 
     async function deleteUser(id) {
-        if (!confirm("Delete this user? This cannot be undone.")) return;
+
+        if (!confirm("Delete this user? This cannot be undone.")) {
+            return;
+        }
+
         try {
-            const res = await fetch(`${BASE_URL}/api/admin/users/${id}`, {
-                method: "DELETE",
-                headers: { "Authorization": "Bearer " + token }
-            });
-            if (!res.ok) throw new Error();
+
+            const res = await fetch(
+                `${BASE_URL}/api/admin/users/${id}`,
+                {
+                    method: "DELETE",
+
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                }
+            );
+
+            if (!res.ok) {
+                throw new Error();
+            }
+
             showToast("User deleted successfully.");
+
             loadUsers();
+
         } catch {
+
             showToast("Failed to delete user.", false);
         }
     }
 
-    function logout() { localStorage.clear(); window.location.href = "login.html"; }
+    function logout() {
+
+        localStorage.clear();
+
+        window.location.href = "login.html";
+    }
 
     loadUsers();
+
 </script>
 
 </body>

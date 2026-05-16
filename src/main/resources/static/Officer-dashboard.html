@@ -1,13 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
     <title>SITIMS | Officer Dashboard</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+            rel="stylesheet"
+    />
 </head>
 
 <body class="bg-gray-100 text-gray-900 min-h-screen">
@@ -22,9 +29,6 @@
 
     const officerName = localStorage.getItem("name");
 
-    const officerEmail = localStorage.getItem("emailFromLogin");
-
-    // ✅ Token expiry check
     function isTokenExpired(t) {
 
         try {
@@ -43,8 +47,6 @@
 
         localStorage.clear();
 
-        alert("Please login first!");
-
         window.location.href = "login.html";
     }
 
@@ -52,7 +54,7 @@
 
 <div class="flex min-h-screen">
 
-    <!-- Sidebar -->
+    <!-- SIDEBAR -->
     <aside class="w-64 bg-blue-900 text-white flex flex-col p-6 shadow-2xl">
 
         <div class="mb-6">
@@ -61,11 +63,15 @@
 
                 <i class="bi bi-shield-lock-fill text-2xl text-blue-300"></i>
 
-                <h2 class="text-xl font-extrabold">SITIMS</h2>
+                <h2 class="text-xl font-extrabold">
+                    SITIMS
+                </h2>
 
             </div>
 
-            <p class="text-blue-400 text-xs ml-9">Officer Panel</p>
+            <p class="text-blue-400 text-xs ml-9">
+                Officer Panel
+            </p>
 
         </div>
 
@@ -74,14 +80,18 @@
             <a href="Officer-dashboard.html"
                class="flex items-center gap-3 p-3 rounded-xl bg-blue-700 font-semibold">
 
-                <i class="bi bi-speedometer2"></i> Dashboard
+                <i class="bi bi-speedometer2"></i>
+
+                Dashboard
 
             </a>
 
             <a href="Officer-edit-profile.html"
                class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
 
-                <i class="bi bi-list-check"></i> edit profile
+                <i class="bi bi-person-gear"></i>
+
+                Edit Profile
 
             </a>
 
@@ -90,46 +100,52 @@
         <button onclick="logout()"
                 class="flex items-center gap-3 p-3 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold mt-4">
 
-            <i class="bi bi-box-arrow-left"></i> Logout
+            <i class="bi bi-box-arrow-left"></i>
+
+            Logout
 
         </button>
 
     </aside>
 
-    <!-- Main -->
+    <!-- MAIN -->
     <main class="flex-1 p-8 overflow-y-auto">
 
-        <!-- Top Bar -->
+        <!-- TOP -->
         <div class="flex justify-between items-center mb-8">
 
             <div>
 
                 <h1 class="text-3xl font-bold text-gray-800">
+
                     Assigned Incidents
+
                 </h1>
 
                 <p class="text-gray-500 text-sm mt-1">
 
                     Officer:
-                    <span class="text-blue-600 font-semibold"
-                          id="topOfficerName"></span>
+                    <span id="topOfficerName"
+                          class="text-blue-600 font-semibold"></span>
 
                 </p>
 
             </div>
 
             <button onclick="loadAssignedIncidents()"
-                    class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition shadow">
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl shadow transition flex items-center gap-2">
 
-                <i class="bi bi-arrow-clockwise"></i> Refresh
+                <i class="bi bi-arrow-clockwise"></i>
+
+                Refresh
 
             </button>
 
         </div>
 
-        <!-- Loading -->
+        <!-- LOADING -->
         <div id="loadingState"
-             class="text-center py-16 text-gray-400 hidden">
+             class="hidden text-center py-16 text-gray-400">
 
             <i class="bi bi-arrow-repeat text-4xl animate-spin block mb-3"></i>
 
@@ -137,19 +153,21 @@
 
         </div>
 
-        <!-- Empty State -->
+        <!-- EMPTY -->
         <div id="emptyState"
              class="hidden text-center py-16">
 
             <i class="bi bi-inbox text-5xl text-gray-300 block mb-4"></i>
 
             <p class="text-gray-500 text-lg">
+
                 No incidents assigned yet.
+
             </p>
 
         </div>
 
-        <!-- Incidents Grid -->
+        <!-- INCIDENT GRID -->
         <div id="incidentsGrid"
              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
@@ -157,15 +175,16 @@
 
 </div>
 
-<!-- Update Modal -->
+<!-- UPDATE MODAL -->
 <div id="modal"
      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
 
-    <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl">
+    <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl">
 
-        <div class="p-6 border-b border-gray-100">
+        <!-- HEADER -->
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
 
-            <h2 class="text-xl font-bold text-blue-600 flex items-center gap-2">
+            <h2 class="text-2xl font-bold text-blue-600 flex items-center gap-2">
 
                 <i class="bi bi-pencil-square"></i>
 
@@ -173,20 +192,29 @@
 
             </h2>
 
+            <button onclick="closeModal()"
+                    class="text-gray-400 hover:text-red-500 text-2xl">
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
         </div>
 
-        <div class="p-6 space-y-4">
+        <!-- BODY -->
+        <div class="p-6 space-y-5">
 
+            <!-- STATUS -->
             <div>
 
-                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
 
                     Update Status
 
                 </label>
 
                 <select id="statusSelect"
-                        class="w-full border border-gray-300 p-3 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+                        class="w-full border border-gray-300 p-4 rounded-2xl bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none">
 
                     <option value="PENDING">PENDING</option>
 
@@ -202,33 +230,51 @@
 
             </div>
 
+            <!-- REMARK -->
             <div>
 
-                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
 
                     Add Remark
 
                 </label>
 
-                <textarea id="remarkInput"
-                          rows="3"
-                          class="w-full border border-gray-300 p-3 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none"
-                          placeholder="Add your remark here..."></textarea>
+                <div class="flex gap-2 items-end">
+
+                    <textarea id="remarkInput"
+                              rows="2"
+                              maxlength="500"
+                              placeholder="Write remark..."
+                              class="flex-1 border border-gray-300 p-3 rounded-2xl bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none"></textarea>
+
+                    <!-- SEND BUTTON -->
+                    <button id="saveRemarkBtn"
+                            class="bg-blue-600 hover:bg-blue-700 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition">
+
+                        <i class="bi bi-send-fill"></i>
+
+                    </button>
+
+                </div>
 
             </div>
 
-            <!-- Previous Remarks -->
+            <!-- PREVIOUS REMARKS -->
             <div>
 
-                <p class="text-sm font-semibold text-gray-700 mb-2">
+                <p class="text-sm font-semibold text-gray-700 mb-3">
+
                     Previous Remarks
+
                 </p>
 
                 <div id="remarkList"
-                     class="max-h-40 overflow-y-auto space-y-2 bg-gray-50 rounded-xl p-3 border border-gray-200">
+                     class="max-h-80 overflow-y-auto space-y-3 bg-gray-50 rounded-2xl p-4 border border-gray-200">
 
                     <p class="text-gray-400 text-sm text-center">
+
                         Loading remarks...
+
                     </p>
 
                 </div>
@@ -237,21 +283,81 @@
 
         </div>
 
+        <!-- FOOTER -->
         <div class="p-6 border-t border-gray-100 flex justify-end gap-3">
 
-            <button id="cancelBtn"
-                    class="px-5 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold transition">
+            <button onclick="closeModal()"
+                    class="px-6 py-3 bg-gray-100 hover:bg-gray-200 rounded-2xl font-semibold transition">
 
                 Cancel
 
             </button>
 
             <button id="saveBtn"
-                    class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition flex items-center gap-2">
+                    class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-semibold transition flex items-center gap-2">
 
                 <i class="bi bi-check-circle"></i>
 
-                Save Changes
+                Save Status
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- EDIT REMARK MODAL -->
+<div id="editRemarkModal"
+     class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+
+    <div class="bg-white rounded-3xl w-full max-w-xl shadow-2xl">
+
+        <!-- HEADER -->
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+
+            <h2 class="text-xl font-bold text-yellow-600 flex items-center gap-2">
+
+                <i class="bi bi-pencil"></i>
+
+                Edit Remark
+
+            </h2>
+
+            <button onclick="closeEditModal()"
+                    class="text-gray-400 hover:text-red-500 text-2xl">
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+        <!-- BODY -->
+        <div class="p-6">
+
+            <textarea id="editRemarkInput"
+                      rows="6"
+                      maxlength="500"
+                      class="w-full border border-gray-300 p-4 rounded-2xl bg-gray-50 focus:ring-2 focus:ring-yellow-400 focus:outline-none resize-none"></textarea>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="p-6 border-t border-gray-100 flex justify-end gap-3">
+
+            <button onclick="closeEditModal()"
+                    class="px-5 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold">
+
+                Cancel
+
+            </button>
+
+            <button id="updateRemarkBtn"
+                    class="px-5 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-semibold">
+
+                Update Remark
 
             </button>
 
@@ -266,7 +372,11 @@
     document.getElementById("topOfficerName").innerText =
         officerName || "Officer";
 
-    const modal = document.getElementById("modal");
+    const modal =
+        document.getElementById("modal");
+
+    const editRemarkModal =
+        document.getElementById("editRemarkModal");
 
     const statusSelect =
         document.getElementById("statusSelect");
@@ -277,7 +387,12 @@
     const remarkList =
         document.getElementById("remarkList");
 
+    const saveRemarkBtn =
+        document.getElementById("saveRemarkBtn");
+
     let editingIncidentId = null;
+
+    let editingRemarkId = null;
 
     const statusColors = {
 
@@ -292,6 +407,18 @@
         CLOSED: "bg-gray-200 text-gray-700"
     };
 
+    // ENTER KEY SAVE
+    remarkInput.addEventListener("keydown", function(e) {
+
+        if (e.key === "Enter" && !e.shiftKey) {
+
+            e.preventDefault();
+
+            saveRemarkBtn.click();
+        }
+    });
+
+    // LOAD INCIDENTS
     async function loadAssignedIncidents() {
 
         document.getElementById("loadingState")
@@ -309,19 +436,10 @@
                 `${BASE_URL}/api/officer/assigned/${officerId}`,
                 {
                     headers: {
-                        "Authorization": "Bearer " + token
+                        Authorization: "Bearer " + token
                     }
                 }
             );
-
-            if (res.status === 401 || res.status === 403) {
-
-                localStorage.clear();
-
-                window.location.href = "login.html";
-
-                return;
-            }
 
             const list = await res.json();
 
@@ -338,30 +456,22 @@
 
             list.forEach(renderIncidentCard);
 
-        } catch (err) {
+        } catch {
 
             document.getElementById("loadingState")
                 .classList.add("hidden");
-
-            document.getElementById("incidentsGrid").innerHTML = `
-
-                <div class="col-span-3 text-center py-10 text-red-400">
-
-                    <i class="bi bi-wifi-off text-4xl block mb-2"></i>
-
-                    <p>Failed to load incidents. Check connection.</p>
-
-                </div>
-            `;
         }
     }
 
+    // INCIDENT CARD
     function renderIncidentCard(i) {
 
         const color =
-            statusColors[i.status] || "bg-gray-100 text-gray-700";
+            statusColors[i.status] ||
+            "bg-gray-100 text-gray-700";
 
-        const div = document.createElement("div");
+        const div =
+            document.createElement("div");
 
         div.className =
             "bg-white rounded-2xl shadow-md hover:shadow-xl transition p-6 border border-gray-100";
@@ -370,61 +480,76 @@
 
             <div class="flex justify-between items-start mb-3">
 
-                <h3 class="font-bold text-gray-800 text-lg">
+                <h3 class="font-bold text-lg text-gray-800">
+
                     ${i.title}
+
                 </h3>
 
-                <span class="text-xs px-2 py-1 rounded-full font-semibold ${color}">
+                <span class="text-xs px-3 py-1 rounded-full font-semibold ${color}">
+
                     ${i.status}
+
                 </span>
 
             </div>
 
-            <p class="text-gray-500 text-sm mb-4 line-clamp-2">
-                ${i.description}
+            <p class="text-gray-500 text-sm mb-4 line-clamp-3">
+
+                ${i.description || "No description"}
+
             </p>
 
-            <div class="space-y-1 text-sm text-gray-600 mb-4">
+            <div class="space-y-2 text-sm text-gray-600 mb-5">
 
                 <p>
+
                     <i class="bi bi-geo-alt-fill text-blue-400 mr-1"></i>
+
                     ${i.location || "—"}
+
                 </p>
 
                 <p>
+
                     <i class="bi bi-exclamation-diamond-fill text-red-400 mr-1"></i>
-                    Severity: ${i.severity || "—"}
-                </p>
 
-                <p>
-                    <i class="bi bi-calendar3 text-gray-400 mr-1"></i>
-                    ${i.createdAt
-                        ? new Date(i.createdAt)
-                            .toLocaleDateString("en-IN")
-                        : "—"}
+                    Severity:
+                    ${i.severity || "—"}
+
                 </p>
 
             </div>
 
-            <div class="flex gap-2 pt-3 border-t border-gray-100">
+            <!-- BUTTONS -->
+            <div class="flex items-center gap-2 pt-3 border-t border-gray-100">
 
+                <!-- UPDATE -->
                 <button
                     onclick="openUpdate(${i.id}, '${i.status}')"
-                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl text-sm font-semibold transition">
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2">
 
-                    <i class="bi bi-pencil mr-1"></i>
+                    <i class="bi bi-pencil-square"></i>
 
-                    Update
+                    <span>Update</span>
 
                 </button>
 
+                <!-- VIEW -->
                 <button
-                    onclick="viewIncidentDetails(${i.id})"
-                    class="flex-1 bg-gray-100 hover:bg-gray-200 py-2 rounded-xl text-sm font-semibold transition">
+                    onclick="viewDetails(${i.id})"
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 w-10 h-10 rounded-xl text-sm transition flex items-center justify-center">
 
-                    <i class="bi bi-eye mr-1"></i>
+                    <i class="bi bi-eye"></i>
 
-                    Details
+                </button>
+
+                <!-- HISTORY -->
+                <button
+                    onclick="viewHistory(${i.id})"
+                    class="bg-purple-500 hover:bg-purple-600 text-white w-10 h-10 rounded-xl text-sm transition flex items-center justify-center">
+
+                    <i class="bi bi-clock-history"></i>
 
                 </button>
 
@@ -435,10 +560,8 @@
             .appendChild(div);
     }
 
-    // ==========================
     // OPEN UPDATE MODAL
-    // ==========================
-    window.openUpdate = async function(id, status) {
+    async function openUpdate(id, status) {
 
         editingIncidentId = id;
 
@@ -446,12 +569,21 @@
 
         remarkInput.value = "";
 
-        remarkList.innerHTML =
-            `<p class="text-gray-400 text-sm text-center">Loading...</p>`;
-
         modal.classList.remove("hidden");
 
-        modal.style.display = "flex";
+        modal.classList.add("flex");
+
+        loadRemarks(id);
+    }
+
+    // LOAD REMARKS
+    async function loadRemarks(id) {
+
+        remarkList.innerHTML = `
+            <p class="text-gray-400 text-center">
+                Loading remarks...
+            </p>
+        `;
 
         try {
 
@@ -459,7 +591,7 @@
                 `${BASE_URL}/api/remarks/incident/${id}`,
                 {
                     headers: {
-                        "Authorization": "Bearer " + token
+                        Authorization: "Bearer " + token
                     }
                 }
             );
@@ -468,211 +600,305 @@
 
             if (!remarks.length) {
 
-                remarkList.innerHTML =
-                    `<p class="text-gray-400 text-sm text-center">
+                remarkList.innerHTML = `
+                    <p class="text-gray-400 text-center">
                         No remarks yet.
-                     </p>`;
+                    </p>
+                `;
 
                 return;
             }
 
-            remarkList.innerHTML = remarks.map(r => `
+            remarkList.innerHTML =
+                remarks.map(r => {
 
-                <div class="bg-white border border-gray-200 rounded-xl p-3">
+                    const isOwner =
+                        String(r.officerId) ===
+                        String(officerId);
 
-                    <div class="flex justify-between items-start gap-2">
+                    return `
 
-                        <div class="flex-1">
+                        <div class="bg-white border border-gray-200 rounded-2xl p-4">
 
-                            <p class="text-blue-600 font-semibold text-sm">
-                                ${r.officerName}
-                            </p>
+                            <div class="flex justify-between items-start gap-3">
 
-                            <p class="text-gray-700 text-sm mt-1">
-                                ${r.text}
-                            </p>
+                                <div class="flex-1">
 
-                            <p class="text-gray-400 text-xs mt-1">
-                                ${r.createdAt
-                                    ? new Date(r.createdAt)
-                                        .toLocaleString("en-IN")
-                                    : ""}
-                            </p>
+                                    <p class="text-blue-600 font-semibold text-sm">
+
+                                        ${r.officerName}
+
+                                    </p>
+
+                                    <p class="text-gray-700 text-sm mt-2 break-words">
+
+                                        ${r.text}
+
+                                    </p>
+
+                                    <p class="text-gray-400 text-xs mt-3">
+
+                                        ${r.createdAt
+                                            ? new Date(r.createdAt)
+                                                .toLocaleString("en-IN")
+                                            : ""}
+
+                                    </p>
+
+                                </div>
+
+                                ${isOwner ? `
+
+                                    <div class="flex gap-2">
+
+                                        <button
+                                            onclick='openEditRemarkModal(${r.id}, ${JSON.stringify(r.text)})'
+                                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-xl text-xs transition">
+
+                                            <i class="bi bi-pencil"></i>
+
+                                        </button>
+
+                                        <button
+                                            onclick="deleteRemark(${r.id})"
+                                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-xl text-xs transition">
+
+                                            <i class="bi bi-trash"></i>
+
+                                        </button>
+
+                                    </div>
+
+                                ` : ""}
+
+                            </div>
 
                         </div>
 
-                        <div class="flex gap-2">
-
-                            <button
-                                onclick="editRemark(${r.id}, \`${r.text}\`)"
-                                class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded-lg text-xs transition">
-
-                                <i class="bi bi-pencil"></i>
-
-                            </button>
-
-                            <button
-                                onclick="deleteRemark(${r.id})"
-                                class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded-lg text-xs transition">
-
-                                <i class="bi bi-trash"></i>
-
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            `).join("");
+                    `;
+                }).join("");
 
         } catch {
 
-            remarkList.innerHTML =
-                `<p class="text-red-400 text-sm text-center">
+            remarkList.innerHTML = `
+                <p class="text-red-400 text-center">
                     Failed to load remarks.
-                 </p>`;
+                </p>
+            `;
         }
-    };
+    }
 
-    document.getElementById("cancelBtn")
-        .addEventListener("click", () => {
+    // CLOSE MODAL
+    function closeModal() {
 
-            modal.classList.add("hidden");
+        modal.classList.add("hidden");
 
-            modal.style.display = "none";
-        });
+        modal.classList.remove("flex");
+    }
 
-    // ==========================
-    // SAVE STATUS + REMARK
-    // ==========================
+    // SAVE STATUS
     document.getElementById("saveBtn")
         .addEventListener("click", async () => {
 
-            const remark = remarkInput.value.trim();
-
-            const btn = document.getElementById("saveBtn");
-
-            btn.disabled = true;
-
-            btn.innerHTML =
-                `<i class="bi bi-arrow-repeat animate-spin"></i> Saving...`;
-
             try {
 
-                // ✅ ONLY THIS API
-                // ❌ REMOVED DUPLICATE REMARK SAVE
-                await fetch(`${BASE_URL}/api/officer/update`, {
+                // GET EMAIL FROM JWT TOKEN
+                const payload =
+                    JSON.parse(atob(token.split(".")[1]));
 
-                    method: "POST",
+                const officerEmail =
+                    payload.sub;
 
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": "Bearer " + token
-                    },
+                const response = await fetch(
+                    `${BASE_URL}/api/officer/update`,
+                    {
 
-                    body: JSON.stringify({
+                        method: "POST",
 
-                        incidentId: editingIncidentId,
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: "Bearer " + token
+                        },
 
-                        status: statusSelect.value,
+                        body: JSON.stringify({
 
-                        remark: remark,
+                            incidentId: editingIncidentId,
 
-                        officerEmail: officerEmail
-                    })
-                });
+                            status: statusSelect.value,
 
-                modal.classList.add("hidden");
+                            remark: remarkInput.value.trim(),
 
-                modal.style.display = "none";
+                            officerEmail: officerEmail
+                        })
+                    }
+                );
+
+                if (!response.ok) {
+
+                    alert("Failed to update incident");
+
+                    return;
+                }
+
+                alert("Incident updated successfully");
+
+                closeModal();
 
                 loadAssignedIncidents();
 
-            } catch (err) {
+            } catch (e) {
 
-                alert("Failed to update. Please try again.");
+                console.log(e);
 
-            } finally {
-
-                btn.disabled = false;
-
-                btn.innerHTML =
-                    `<i class="bi bi-check-circle"></i> Save Changes`;
+                alert("Failed to update incident");
             }
         });
 
-    // ==========================
-    // EDIT REMARK
-    // ==========================
-    async function editRemark(id, oldText) {
+    // SAVE REMARK
+    saveRemarkBtn.addEventListener("click", async () => {
 
-        const newText = prompt("Edit Remark", oldText);
+        const remark =
+            remarkInput.value.trim();
 
-        if (!newText || newText.trim() === "") {
+        if (!remark) {
             return;
         }
 
         try {
 
             const res = await fetch(
-
-                `${BASE_URL}/api/remarks/update/${id}?text=${encodeURIComponent(newText)}`,
-
+                `${BASE_URL}/api/remarks/add`,
                 {
-                    method: "PUT",
+
+                    method: "POST",
 
                     headers: {
-                        "Authorization": "Bearer " + token
-                    }
+                        "Content-Type": "application/json",
+                        Authorization: "Bearer " + token
+                    },
+
+                    body: JSON.stringify({
+
+                        incidentId: editingIncidentId,
+
+                        text: remark
+                    })
                 }
             );
 
             if (!res.ok) {
 
-                return alert("Failed to update remark");
+                alert("Failed to save remark");
+
+                return;
             }
 
-            openUpdate(editingIncidentId, statusSelect.value);
+            remarkInput.value = "";
+
+            loadRemarks(editingIncidentId);
 
         } catch {
 
-            alert("Error updating remark");
+            alert("Error saving remark");
         }
+    });
+
+    // OPEN EDIT MODAL
+    function openEditRemarkModal(id, text) {
+
+        editingRemarkId = id;
+
+        document.getElementById("editRemarkInput")
+            .value = text;
+
+        editRemarkModal.classList.remove("hidden");
+
+        editRemarkModal.classList.add("flex");
     }
 
-    // ==========================
+    // CLOSE EDIT MODAL
+    function closeEditModal() {
+
+        editRemarkModal.classList.add("hidden");
+
+        editRemarkModal.classList.remove("flex");
+    }
+
+    // UPDATE REMARK
+    document.getElementById("updateRemarkBtn")
+        .addEventListener("click", async () => {
+
+            const newText =
+                document.getElementById("editRemarkInput")
+                    .value.trim();
+
+            if (!newText) {
+                return;
+            }
+
+            try {
+
+                const res = await fetch(
+                    `${BASE_URL}/api/remarks/update/${editingRemarkId}?text=${encodeURIComponent(newText)}`,
+                    {
+
+                        method: "PUT",
+
+                        headers: {
+                            Authorization: "Bearer " + token
+                        }
+                    }
+                );
+
+                if (!res.ok) {
+
+                    alert("Failed to update remark");
+
+                    return;
+                }
+
+                closeEditModal();
+
+                loadRemarks(editingIncidentId);
+
+            } catch {
+
+                alert("Error updating remark");
+            }
+        });
+
     // DELETE REMARK
-    // ==========================
     async function deleteRemark(id) {
 
-        const confirmDelete =
+        const ok =
             confirm("Delete this remark?");
 
-        if (!confirmDelete) return;
+        if (!ok) {
+            return;
+        }
 
         try {
 
             const res = await fetch(
-
                 `${BASE_URL}/api/remarks/delete/${id}`,
-
                 {
+
                     method: "DELETE",
 
                     headers: {
-                        "Authorization": "Bearer " + token
+                        Authorization: "Bearer " + token
                     }
                 }
             );
 
             if (!res.ok) {
 
-                return alert("Failed to delete remark");
+                alert("Failed to delete remark");
+
+                return;
             }
 
-            openUpdate(editingIncidentId, statusSelect.value);
+            loadRemarks(editingIncidentId);
 
         } catch {
 
@@ -680,12 +906,21 @@
         }
     }
 
-    function viewIncidentDetails(id) {
+    // VIEW DETAILS
+    function viewDetails(id) {
 
         window.location.href =
             `officer-incident-details.html?id=${id}`;
     }
 
+    // VIEW HISTORY
+    function viewHistory(id) {
+
+        window.location.href =
+            `incident-history.html?id=${id}`;
+    }
+
+    // LOGOUT
     function logout() {
 
         localStorage.clear();
@@ -693,9 +928,11 @@
         window.location.href = "login.html";
     }
 
+    // INITIAL LOAD
     loadAssignedIncidents();
 
 </script>
 
 </body>
+
 </html>

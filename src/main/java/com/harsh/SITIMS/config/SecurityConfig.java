@@ -44,7 +44,9 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http.csrf(csrf -> csrf.disable())
+
                 .authorizeHttpRequests(auth -> auth
 
                         // ✅ Public endpoints — no login needed
@@ -71,8 +73,9 @@ public class SecurityConfig {
                                 "/Officer-dashboard.html",
                                 "/officer-incident-details.html",
                                 "/officer-incident-list.html",
-                               "/user-edit-profile.html",
+                                "/user-edit-profile.html",
                                 "/admin-officer-update.html",
+                                "/incident-history.html",
                                 "/Officer-edit-profile.html",
                                 "/Officer-tips.html",
                                 "/update-incident.html",
@@ -80,14 +83,29 @@ public class SecurityConfig {
                                 "/officer-update-status.html",
                                 "/officer.html",
                                 "/create-incident.html",
-                               "/edit-officer.html","/my-incidents.html"
-
+                                "/informant-dashboard.html",
+                                "/informant-edit-profile.html",
+                                "/edit-officer.html","/edit-tip.html",
+                                "/my-incidents.html","/user-update-incidents.html","/my-tips.html"
 
                         ).permitAll()
+
+                        // ✅ USER + ADMIN incident endpoints
+                        .requestMatchers(
+                                "/api/incidents/create",
+                                "/api/incidents/user/**",
+                                "/api/incidents/my",
+                                "/api/incidents/update/**"
+                        ).hasAnyRole("USER", "ADMIN")
 
                         // ✅ FIXED — Admin only endpoints
                         .requestMatchers(
                                 "/api/admin/**",
+
+                                "/api/incidents/all",
+                                "/api/incidents/assign",
+                                "/api/incidents/delete/**",
+
                                 "/admin-dashboard.html",
                                 "/admin-incidents.html",
                                 "/admin-informant.html",
@@ -99,6 +117,7 @@ public class SecurityConfig {
                                 "/add-officer.html",
                                 "/admin-update-incident.html",
                                 "/admin-user-update.html"
+
                         ).hasRole("ADMIN")
 
                         // ✅ FIXED — Officer only endpoints
@@ -115,11 +134,15 @@ public class SecurityConfig {
                         // ✅ All other requests need login
                         .anyRequest().authenticated()
                 )
+
                 .sessionManagement(sess -> sess
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(jwtAuthFilter,
-                    UsernamePasswordAuthenticationFilter.class);
+
+                .addFilterBefore(
+                        jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }

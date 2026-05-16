@@ -3,270 +3,576 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Incident Details</title>
+    <title>SITIMS | Incident Details</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 
-<body class="bg-blue-50 min-h-screen p-6 text-gray-900">
+<body class="bg-gray-100 text-gray-900 min-h-screen">
 
 <script>
 
+    const BASE_URL = "http://localhost:8080";
+
     const token = localStorage.getItem("token");
-    const officerName = localStorage.getItem("name") || "Officer";
 
-    if (!token) {
+    const role = localStorage.getItem("role");
 
-        alert("Please login first!");
+    const officerName =
+        localStorage.getItem("name") || "Officer";
+
+    function isTokenExpired(t) {
+
+        try {
+
+            const p = JSON.parse(atob(t.split('.')[1]));
+
+            return p.exp * 1000 < Date.now();
+
+        } catch {
+
+            return true;
+        }
+    }
+
+    if (!token || isTokenExpired(token)) {
+
+        localStorage.clear();
 
         window.location.href = "login.html";
     }
 
 </script>
 
-<div class="max-w-5xl mx-auto bg-white rounded-3xl shadow-2xl p-8">
+<div class="flex min-h-screen">
 
-    <h2 class="text-3xl font-bold mb-8 text-blue-600 text-center">
-        Incident Details
-    </h2>
+    <!-- Sidebar -->
+    <aside class="w-64 bg-blue-900 text-white flex flex-col p-6 shadow-2xl">
 
-    <!-- Incident Details -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <div class="mb-6">
 
-        <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100">
-            <p class="text-sm text-gray-500 mb-1">Incident ID</p>
-            <p id="incidentId" class="font-bold text-lg text-blue-700">Loading...</p>
+            <div class="flex items-center gap-3 mb-1">
+
+                <i class="bi bi-shield-lock-fill text-2xl text-blue-300"></i>
+
+                <h2 class="text-xl font-extrabold">SITIMS</h2>
+
+            </div>
+
+            <p class="text-blue-400 text-xs ml-9">
+                Officer Panel
+            </p>
+
         </div>
 
-        <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100">
-            <p class="text-sm text-gray-500 mb-1">Title</p>
-            <p id="incidentTitle" class="font-semibold text-gray-800">Loading...</p>
-        </div>
+        <nav class="space-y-1 flex-1">
 
-        <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100 md:col-span-2">
-            <p class="text-sm text-gray-500 mb-1">Description</p>
-            <p id="incidentDescription" class="text-gray-700">Loading...</p>
-        </div>
+            <a href="Officer-dashboard.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
 
-        <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100">
-            <p class="text-sm text-gray-500 mb-1">Status</p>
+                <i class="bi bi-speedometer2"></i>
+                Dashboard
 
-            <span id="incidentStatus"
-                  class="px-3 py-1 rounded-full text-sm font-semibold">
-                Loading...
-            </span>
-        </div>
+            </a>
 
-        <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100">
-            <p class="text-sm text-gray-500 mb-1">Severity</p>
 
-            <span id="incidentSeverity"
-                  class="px-3 py-1 rounded-full text-sm font-semibold bg-yellow-200 text-yellow-800">
-                Loading...
-            </span>
-        </div>
 
-        <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100">
-            <p class="text-sm text-gray-500 mb-1">Location</p>
-            <p id="incidentLocation" class="text-gray-700">Loading...</p>
-        </div>
+            <a href="Officer-edit-profile.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition">
 
-        <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100">
-            <p class="text-sm text-gray-500 mb-1">Assigned Officer</p>
-            <p id="assignedOfficer" class="text-gray-700">Loading...</p>
-        </div>
+                <i class="bi bi-person-gear"></i>
+                Edit Profile
 
-    </div>
+            </a>
 
-    <!-- Officer Remark -->
-    <div class="mb-10">
+        </nav>
 
-        <h3 class="text-2xl font-bold text-blue-600 mb-4">
-            Officer Remark
-        </h3>
+        <button onclick="logout()"
+                class="flex items-center gap-3 p-3 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold mt-4">
 
-        <div id="officerRemark"
-             class="bg-gray-100 border border-gray-200 rounded-2xl p-5 text-gray-700">
-            Loading officer remark...
-        </div>
-
-    </div>
-
-    <!-- All Remarks -->
-    <div>
-
-        <h3 class="text-2xl font-bold text-blue-600 mb-4">
-            All Remarks
-        </h3>
-
-        <div id="remarkList" class="space-y-4">
-            <p class="text-gray-500">Loading remarks...</p>
-        </div>
-
-    </div>
-
-    <!-- Back Button -->
-    <div class="mt-10 text-center">
-
-        <button
-                onclick="window.location.href='Officer-dashboard.html'"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition">
-
-            ← Back to Assigned Incidents
+            <i class="bi bi-box-arrow-left"></i>
+            Logout
 
         </button>
 
-    </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 p-8 overflow-y-auto">
+
+        <!-- Top Bar -->
+        <div class="flex justify-between items-center mb-6">
+
+            <button onclick="history.back()"
+                    class="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold transition">
+
+                <i class="bi bi-arrow-left"></i>
+
+                Back
+
+            </button>
+
+            <button onclick="viewHistory()"
+                    class="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl shadow transition">
+
+                <i class="bi bi-clock-history"></i>
+
+                History
+
+            </button>
+
+        </div>
+
+        <!-- Incident Card -->
+        <div class="bg-white rounded-3xl shadow-md border border-gray-100 p-8 mb-6">
+
+            <div class="flex justify-between items-start mb-6">
+
+                <div>
+
+                    <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-2">
+
+                        <i class="bi bi-exclamation-triangle-fill text-orange-500"></i>
+
+                        Incident Details
+
+                    </h1>
+
+                    <p class="text-gray-500 text-sm mt-1">
+                        Detailed incident information
+                    </p>
+
+                </div>
+
+                <span id="statusBadge"
+                      class="px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-600">
+
+                    Loading...
+
+                </span>
+
+            </div>
+
+            <!-- Loading -->
+            <div id="detailsLoading"
+                 class="text-center py-16 text-gray-400">
+
+                <i class="bi bi-arrow-repeat animate-spin text-4xl block mb-3"></i>
+
+                <p>Loading incident details...</p>
+
+            </div>
+
+            <!-- Details -->
+            <div id="detailsGrid"
+                 class="hidden grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+
+        </div>
+
+        <!-- Officer Remark -->
+        <div class="bg-white rounded-3xl shadow-md border border-gray-100 p-6 mb-6">
+
+            <h3 class="text-xl font-bold text-blue-600 mb-4 flex items-center gap-2">
+
+                <i class="bi bi-chat-left-quote-fill"></i>
+
+                Officer Remark
+
+            </h3>
+
+            <div id="officerRemark">
+
+                <p class="text-gray-400">
+                    Loading remark...
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- All Remarks -->
+        <div class="bg-white rounded-3xl shadow-md border border-gray-100 p-6">
+
+            <div class="flex justify-between items-center mb-5">
+
+                <h3 class="text-xl font-bold text-green-600 flex items-center gap-2">
+
+                    <i class="bi bi-chat-dots-fill"></i>
+
+                    All Remarks
+
+                </h3>
+
+                <span id="remarkCount"
+                      class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full font-semibold">
+
+                    0 remarks
+
+                </span>
+
+            </div>
+
+            <div id="remarkList" class="space-y-4">
+
+                <p class="text-gray-400 text-center py-6">
+                    Loading remarks...
+                </p>
+
+            </div>
+
+        </div>
+
+    </main>
 
 </div>
 
 <script>
 
-    const params = new URLSearchParams(window.location.search);
+    const params =
+        new URLSearchParams(window.location.search);
 
     const id = params.get("id");
 
+    const statusColors = {
+
+        PENDING: "bg-yellow-100 text-yellow-700",
+
+        IN_PROGRESS: "bg-blue-100 text-blue-700",
+
+        ASSIGNED: "bg-indigo-100 text-indigo-700",
+
+        RESOLVED: "bg-green-100 text-green-700",
+
+        CLOSED: "bg-gray-200 text-gray-700"
+    };
+
+    const severityColors = {
+
+        LOW: "bg-green-100 text-green-700",
+
+        MEDIUM: "bg-yellow-100 text-yellow-700",
+
+        HIGH: "bg-orange-100 text-orange-700",
+
+        CRITICAL: "bg-red-100 text-red-700"
+    };
+
+    // ==========================
+    // LOAD INCIDENT DETAILS
+    // ==========================
     async function loadDetails() {
 
         try {
 
-            const res = await fetch(`http://localhost:8080/api/incidents/${id}`, {
+            const res = await fetch(
 
-                headers: {
-                    "Authorization": "Bearer " + token
+                `${BASE_URL}/api/incidents/${id}`,
+
+                {
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
                 }
-
-            });
+            );
 
             if (!res.ok) {
 
-                alert("Failed to load incident details.");
-
-                return;
+                throw new Error();
             }
 
             const inc = await res.json();
 
+            document.getElementById("detailsLoading")
+                .classList.add("hidden");
+
+            const grid =
+                document.getElementById("detailsGrid");
+
+            grid.classList.remove("hidden");
+
+            // STATUS BADGE
+            const statusBadge =
+                document.getElementById("statusBadge");
+
+            statusBadge.innerText =
+                inc.status || "N/A";
+
+            statusBadge.className =
+                `px-4 py-2 rounded-full text-sm font-semibold ${
+                    statusColors[inc.status]
+                    || "bg-gray-100 text-gray-700"
+                }`;
+
+            // SEVERITY BADGE
+            const severity =
+                severityColors[inc.severity]
+                || "bg-gray-100 text-gray-700";
+
+            // ASSIGNED OFFICER
             const assignedOfficer =
-                inc.assignedOfficer?.name || officerName;
+                inc.assignedOfficer?.fullName
+                || inc.assignedOfficer?.name
+                || officerName;
 
-            document.getElementById("incidentId").innerText =
-                inc.id || "N/A";
+            grid.innerHTML = `
 
-            document.getElementById("incidentTitle").innerText =
-                inc.title || "N/A";
+                ${detailCard(
+                    "Incident ID",
+                    "#" + (inc.id || "N/A"),
+                    "bi-hash"
+                )}
 
-            document.getElementById("incidentDescription").innerText =
-                inc.description || "N/A";
+                ${detailCard(
+                    "Title",
+                    inc.title || "N/A",
+                    "bi-file-text"
+                )}
 
-            document.getElementById("incidentLocation").innerText =
-                inc.location || inc.tipLocation || "N/A";
+                ${detailCard(
+                    "Location",
+                    inc.location || inc.tipLocation || "N/A",
+                    "bi-geo-alt-fill"
+                )}
 
-            document.getElementById("assignedOfficer").innerText =
-                assignedOfficer;
+                ${detailCard(
+                    "Reported By",
+                    inc.reportedBy || "N/A",
+                    "bi-person-fill"
+                )}
 
-            document.getElementById("incidentSeverity").innerText =
-                inc.severity || inc.priority || "N/A";
+                ${detailCard(
+                    "Assigned Officer",
+                    assignedOfficer,
+                    "bi-person-badge-fill"
+                )}
 
-            const statusElement =
-                document.getElementById("incidentStatus");
+                ${detailCard(
+                    "Created At",
+                    inc.createdAt
+                        ? new Date(inc.createdAt)
+                            .toLocaleString("en-IN")
+                        : "N/A",
+                    "bi-calendar3"
+                )}
 
-            statusElement.innerText = inc.status || "N/A";
+                <div class="bg-gray-50 rounded-2xl border border-gray-200 p-5">
 
-            statusElement.className =
-                `px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(inc.status)}`;
+                    <p class="text-xs text-gray-400 uppercase font-semibold mb-2">
 
+                        Severity
+
+                    </p>
+
+                    <span class="px-3 py-1 rounded-full text-sm font-semibold ${severity}">
+
+                        ${inc.severity || "N/A"}
+
+                    </span>
+
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl border border-gray-200 p-5 md:col-span-2">
+
+                    <p class="text-xs text-gray-400 uppercase font-semibold mb-2">
+
+                        Description
+
+                    </p>
+
+                    <p class="text-gray-700 leading-relaxed text-sm">
+
+                        ${inc.description || "No description available."}
+
+                    </p>
+
+                </div>
+            `;
+
+            // OFFICER REMARK
             document.getElementById("officerRemark").innerHTML =
+
                 inc.officerRemark
-                    ? inc.officerRemark
-                    : `<span class="text-gray-500">No officer remark yet.</span>`;
+
+                    ? `
+                        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-5 text-blue-800 text-sm">
+                            ${inc.officerRemark}
+                        </div>
+                      `
+
+                    : `
+                        <p class="text-gray-400 italic text-sm">
+                            No officer remark available.
+                        </p>
+                      `;
 
         } catch (err) {
 
-            console.error(err);
+            document.getElementById("detailsLoading")
+                .innerHTML = `
 
-            alert("Error loading incident details.");
+                <div class="text-red-400">
+
+                    <i class="bi bi-x-circle text-4xl block mb-2"></i>
+
+                    Failed to load incident details.
+
+                </div>
+            `;
         }
     }
 
-    function getStatusColor(status) {
+    function detailCard(label, value, icon) {
 
-        return {
-            'NEW': 'bg-yellow-200 text-yellow-800',
-            'IN_PROGRESS': 'bg-blue-200 text-blue-800',
-            'ASSIGNED': 'bg-indigo-200 text-indigo-800',
-            'RESOLVED': 'bg-green-200 text-green-800',
-            'CLOSED': 'bg-gray-300 text-gray-800'
-        }[status] || 'bg-gray-200 text-gray-800';
+        return `
+
+            <div class="bg-gray-50 rounded-2xl border border-gray-200 p-5">
+
+                <p class="text-xs text-gray-400 uppercase font-semibold mb-2 flex items-center gap-1">
+
+                    <i class="bi ${icon}"></i>
+
+                    ${label}
+
+                </p>
+
+                <p class="text-gray-800 text-sm font-medium break-words">
+
+                    ${value}
+
+                </p>
+
+            </div>
+        `;
     }
 
+    // ==========================
+    // LOAD REMARKS
+    // ==========================
     async function loadRemarks() {
 
         try {
 
-            const res = await fetch(`http://localhost:8080/api/remarks/incident/${id}`, {
+            const res = await fetch(
 
-                headers: {
-                    "Authorization": "Bearer " + token
+                `${BASE_URL}/api/remarks/incident/${id}`,
+
+                {
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
                 }
-
-            });
+            );
 
             const remarks = await res.json();
 
-            const remarkList =
-                document.getElementById("remarkList");
+            document.getElementById("remarkCount")
+                .innerText = `${remarks.length} remarks`;
 
             if (!remarks.length) {
 
-                remarkList.innerHTML = `
-                    <p class="text-gray-500">
-                        No remarks yet.
+                document.getElementById("remarkList")
+                    .innerHTML = `
+
+                    <p class="text-gray-400 text-center italic py-5">
+
+                        No remarks available.
+
                     </p>
                 `;
 
                 return;
             }
 
-            remarkList.innerHTML = remarks.map(r => `
+            document.getElementById("remarkList").innerHTML =
 
-                <div class="bg-gray-100 border border-gray-200 rounded-2xl p-5">
+                remarks.map(r => `
 
-                    <div class="flex justify-between items-center mb-2">
+                    <div class="bg-gray-50 border border-gray-200 rounded-2xl p-5">
 
-                        <h4 class="font-bold text-blue-600">
-                            ${r.officerName || "Unknown Officer"}
-                        </h4>
+                        <div class="flex justify-between items-start gap-3 mb-2">
 
-                        <span class="text-sm text-gray-500">
-                            ${r.createdAt || ""}
-                        </span>
+                            <div>
+
+                                <p class="text-blue-600 font-semibold text-sm flex items-center gap-1">
+
+                                    <i class="bi bi-person-circle"></i>
+
+                                    ${r.officerName || "Unknown Officer"}
+
+                                </p>
+
+                            </div>
+
+                            <p class="text-xs text-gray-400">
+
+                                ${r.createdAt
+                                    ? new Date(r.createdAt)
+                                        .toLocaleString("en-IN")
+                                    : ""}
+
+                            </p>
+
+                        </div>
+
+                        <p class="text-gray-700 text-sm leading-relaxed">
+
+                            ${r.text || ""}
+
+                        </p>
 
                     </div>
+                `).join("");
 
-                    <p class="text-gray-700">
-                        ${r.text}
-                    </p>
+        } catch (err) {
 
-                </div>
+            document.getElementById("remarkList")
+                .innerHTML = `
 
-            `).join("");
+                <p class="text-red-400 text-center">
 
-        } catch (e) {
-
-            console.error(e);
-
-            document.getElementById("remarkList").innerHTML = `
-                <p class="text-red-500">
                     Failed to load remarks.
+
                 </p>
             `;
         }
     }
 
-    loadDetails();
+    // ==========================
+    // VIEW HISTORY
+    // ==========================
+    function viewHistory() {
 
-    loadRemarks();
+        window.location.href =
+            `incident-history.html?id=${id}`;
+    }
+
+    function logout() {
+
+        localStorage.clear();
+
+        window.location.href = "login.html";
+    }
+
+    if (id) {
+
+        loadDetails();
+
+        loadRemarks();
+
+    } else {
+
+        document.getElementById("detailsLoading")
+            .innerHTML = `
+
+            <p class="text-red-400 text-center">
+
+                Invalid incident ID.
+
+            </p>
+        `;
+    }
 
 </script>
 

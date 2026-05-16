@@ -4,276 +4,674 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SITIMS | Manage Incidents</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+          rel="stylesheet">
 </head>
+
 <body class="bg-gray-100 text-gray-900 min-h-screen">
 
 <script>
+
     const BASE_URL = "http://localhost:8080";
+
     const token = localStorage.getItem("token");
+
     const role = localStorage.getItem("role");
 
     function isTokenExpired(t) {
-        try { const p = JSON.parse(atob(t.split('.')[1])); return p.exp * 1000 < Date.now(); }
-        catch { return true; }
+
+        try {
+
+            const p = JSON.parse(atob(t.split('.')[1]));
+
+            return p.exp * 1000 < Date.now();
+
+        } catch {
+
+            return true;
+        }
     }
 
     if (!token || role !== "ADMIN" || isTokenExpired(token)) {
+
         localStorage.clear();
+
         window.location.href = "login.html";
     }
+
 </script>
 
 <div class="flex min-h-screen">
 
     <!-- Sidebar -->
     <aside class="w-64 bg-blue-900 text-white flex flex-col p-6 shadow-2xl">
+
         <div class="mb-6">
+
             <div class="flex items-center gap-3 mb-1">
+
                 <i class="bi bi-shield-lock-fill text-2xl text-blue-300"></i>
-                <h2 class="text-xl font-extrabold">SITIMS</h2>
+
+                <h2 class="text-xl font-extrabold">
+                    SITIMS
+                </h2>
+
             </div>
-            <p class="text-blue-400 text-xs ml-9">Admin Panel</p>
+
+            <p class="text-blue-400 text-xs ml-9">
+                Admin Panel
+            </p>
+
         </div>
+
         <nav class="space-y-1 flex-1">
-            <a href="admin-dashboard.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-speedometer2"></i> Dashboard</a>
-            <a href="admin-incidents.html" class="flex items-center gap-3 p-3 rounded-xl bg-blue-700 font-semibold"><i class="bi bi-exclamation-triangle"></i> Incidents</a>
-            <a href="admin-officers.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-person-badge"></i> Officers</a>
-            <a href="admin-user.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-people"></i> Users</a>
-            <a href="admin-informant.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-incognito"></i> Informants</a>
-            <a href="admin-tips.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800 transition"><i class="bi bi-lightbulb"></i> Tips</a>
+
+            <a href="admin-dashboard.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800">
+
+                Dashboard
+
+            </a>
+
+            <a href="admin-incidents.html"
+               class="flex items-center gap-3 p-3 rounded-xl bg-blue-700 font-semibold">
+
+                Incidents
+
+            </a>
+
+            <a href="admin-officers.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800">
+
+                Officers
+
+            </a>
+
+            <a href="admin-user.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800">
+
+                Users
+
+            </a>
+
+            <a href="admin-informant.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800">
+
+                Informants
+
+            </a>
+
+            <a href="admin-tips.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-800">
+
+                Tips
+
+            </a>
+
         </nav>
-        <button onclick="logout()" class="flex items-center gap-3 p-3 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold mt-4">
-            <i class="bi bi-box-arrow-left"></i> Logout
+
+        <button onclick="logout()"
+                class="bg-red-600 p-3 rounded mt-4 hover:bg-red-700 transition">
+
+            Logout
+
         </button>
+
     </aside>
 
     <!-- Main -->
-    <main class="flex-1 p-8">
+    <main class="flex-1 p-8 overflow-y-auto">
 
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
+        <!-- Top -->
+        <div class="flex justify-between items-center mb-6">
+
             <div>
-                <h1 class="text-3xl font-bold text-gray-800">All Incidents</h1>
-                <p class="text-gray-500 text-sm mt-1">Manage, assign and track all reported incidents</p>
+
+                <h1 class="text-3xl font-bold">
+                    All Incidents
+                </h1>
+
+                <p class="text-gray-500 text-sm">
+                    Manage and assign incidents
+                </p>
+
             </div>
-            <!-- Filter -->
-            <select id="statusFilter" onchange="filterStatus()"
-                    class="border border-gray-300 rounded-xl px-4 py-2 bg-white shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none">
+
+            <select id="statusFilter"
+                    onchange="filterStatus()"
+                    class="border border-gray-300 rounded-xl px-4 py-2 bg-white">
+
                 <option value="ALL">All Status</option>
                 <option value="PENDING">Pending</option>
                 <option value="ASSIGNED">Assigned</option>
                 <option value="IN_PROGRESS">In Progress</option>
                 <option value="RESOLVED">Resolved</option>
+                <option value="CLOSED">Closed</option>
+
             </select>
+
         </div>
 
-        <!-- Active Incidents -->
+        <!-- Active -->
         <div class="bg-white rounded-2xl shadow-md overflow-hidden mb-8">
-            <div class="bg-blue-600 px-6 py-4">
-                <h2 class="text-white font-bold text-lg flex items-center gap-2">
-                    <i class="bi bi-exclamation-triangle-fill"></i> Active Incidents
+
+            <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
+
+                <h2 class="font-bold text-lg">
+                    Active Incidents
                 </h2>
+
+                <span id="activeCount"
+                      class="bg-white/20 px-3 py-1 rounded-full text-sm">
+                </span>
+
             </div>
+
             <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-blue-50 text-blue-700 text-sm uppercase">
+
+                <table class="w-full text-sm">
+
+                    <thead class="bg-blue-50 text-gray-700">
+
                     <tr>
-                        <th class="px-6 py-3 text-left">Title</th>
-                        <th class="px-6 py-3 text-left">Location</th>
-                        <th class="px-6 py-3 text-left">Severity</th>
-                        <th class="px-6 py-3 text-left">Status</th>
-                        <th class="px-6 py-3 text-left">Assigned Officer</th>
-                        <th class="px-6 py-3 text-left">Actions</th>
+
+                        <th class="p-4 text-left">No.</th>
+                        <th class="p-4 text-left">Title</th>
+                        <th class="text-left">Location</th>
+                        <th class="text-left">Severity</th>
+                        <th class="text-left">Status</th>
+                        <th class="text-left">Officer</th>
+                        <th class="text-left">Actions</th>
+
                     </tr>
+
                     </thead>
-                    <tbody id="adminTable" class="divide-y divide-gray-100 text-sm">
-                        <tr><td colspan="6" class="px-6 py-8 text-center text-gray-400">
-                            <i class="bi bi-arrow-repeat animate-spin text-2xl block mb-2"></i>Loading...
-                        </td></tr>
-                    </tbody>
+
+                    <tbody id="adminTable"></tbody>
+
                 </table>
+
             </div>
+
         </div>
 
-        <!-- Resolved Incidents -->
+        <!-- Resolved -->
         <div class="bg-white rounded-2xl shadow-md overflow-hidden">
-            <div class="bg-green-600 px-6 py-4">
-                <h2 class="text-white font-bold text-lg flex items-center gap-2">
-                    <i class="bi bi-check-circle-fill"></i> Resolved Incidents
+
+            <div class="bg-green-600 text-white p-4 flex justify-between items-center">
+
+                <h2 class="font-bold text-lg">
+                    Resolved / Closed
                 </h2>
+
+                <span id="resolvedCount"
+                      class="bg-white/20 px-3 py-1 rounded-full text-sm">
+                </span>
+
             </div>
+
             <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-green-50 text-green-700 text-sm uppercase">
+
+                <table class="w-full text-sm">
+
+                    <thead class="bg-green-50 text-gray-700">
+
                     <tr>
-                        <th class="px-6 py-3 text-left">Title</th>
-                        <th class="px-6 py-3 text-left">Location</th>
-                        <th class="px-6 py-3 text-left">Severity</th>
-                        <th class="px-6 py-3 text-left">Status</th>
-                        <th class="px-6 py-3 text-left">Assigned Officer</th>
+
+                        <th class="p-4 text-left">No.</th>
+                        <th class="p-4 text-left">Title</th>
+                        <th class="text-left">Location</th>
+                        <th class="text-left">Severity</th>
+                        <th class="text-left">Status</th>
+                        <th class="text-left">Officer</th>
+                        <th class="text-left">Actions</th>
+
                     </tr>
+
                     </thead>
-                    <tbody id="resolvedTableBody" class="divide-y divide-gray-100 text-sm">
-                        <tr><td colspan="5" class="px-6 py-4 text-center text-gray-400">No resolved incidents</td></tr>
-                    </tbody>
+
+                    <tbody id="resolvedTableBody"></tbody>
+
                 </table>
+
             </div>
+
         </div>
 
     </main>
+
 </div>
 
-<!-- Assign Officer Modal -->
-<div id="assignPopup" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
-        <h4 class="text-xl font-bold text-blue-600 mb-5 flex items-center gap-2">
-            <i class="bi bi-person-plus-fill"></i> Assign Officer
-        </h4>
+<!-- Assign Popup -->
+<div id="assignPopup"
+     class="fixed inset-0 hidden bg-black/50 items-center justify-center z-50">
+
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+
+        <h2 class="text-xl font-bold mb-5">
+            Assign Officer
+        </h2>
+
         <select id="officerSelect"
-                class="w-full p-3 rounded-xl border border-gray-300 mb-6 focus:ring-2 focus:ring-blue-400 focus:outline-none bg-gray-50"></select>
+                class="w-full border border-gray-300 rounded-xl p-3 mb-5">
+        </select>
+
         <div class="flex justify-end gap-3">
+
             <button onclick="closeAssignPopup()"
-                    class="px-5 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold transition">Cancel</button>
-            <button onclick="assignOfficer()"
-                    class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition">
-                <i class="bi bi-check-circle mr-1"></i>Assign
+                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-xl">
+
+                Cancel
+
             </button>
+
+            <button onclick="assignOfficer()"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl">
+
+                Assign
+
+            </button>
+
         </div>
+
     </div>
+
 </div>
 
 <script>
-    let selectedIncidentId;
+
     let allIncidents = [];
 
+    let selectedIncidentId = null;
+
     const severityColors = {
-        LOW: "bg-green-100 text-green-700",
-        MEDIUM: "bg-yellow-100 text-yellow-700",
-        HIGH: "bg-orange-100 text-orange-700",
-        CRITICAL: "bg-red-100 text-red-700"
+
+        LOW: "text-green-600 font-semibold",
+        MEDIUM: "text-yellow-600 font-semibold",
+        HIGH: "text-orange-600 font-semibold",
+        CRITICAL: "text-red-600 font-semibold"
     };
 
     const statusColors = {
-        PENDING: "bg-yellow-100 text-yellow-700",
-        ASSIGNED: "bg-indigo-100 text-indigo-700",
-        IN_PROGRESS: "bg-blue-100 text-blue-700",
-        RESOLVED: "bg-green-100 text-green-700"
+
+        PENDING: "text-yellow-600 font-semibold",
+        ASSIGNED: "text-indigo-600 font-semibold",
+        IN_PROGRESS: "text-blue-600 font-semibold",
+        RESOLVED: "text-green-600 font-semibold",
+        CLOSED: "text-gray-600 font-semibold"
     };
 
     async function loadAllIncidents() {
+
         try {
+
             const res = await fetch(`${BASE_URL}/api/incidents/all`, {
-                headers: { "Authorization": "Bearer " + token }
+
+                headers: {
+                    Authorization: "Bearer " + token
+                }
             });
-            if (res.status === 401) { localStorage.clear(); window.location.href = "login.html"; return; }
+
             allIncidents = await res.json();
+
             renderTable(allIncidents);
+
         } catch (err) {
-            document.getElementById("adminTable").innerHTML =
-                `<tr><td colspan="6" class="px-6 py-4 text-center text-red-400">Failed to load incidents.</td></tr>`;
+
+            console.error(err);
+
+            alert("Failed to load incidents");
         }
     }
 
     function renderTable(list) {
-        const activeTable = document.getElementById("adminTable");
-        const resolvedTable = document.getElementById("resolvedTableBody");
+
+        const activeTable =
+            document.getElementById("adminTable");
+
+        const resolvedTable =
+            document.getElementById("resolvedTableBody");
+
         activeTable.innerHTML = "";
+
         resolvedTable.innerHTML = "";
-        let hasActive = false, hasResolved = false;
 
-        list.forEach(item => {
-            const sev = severityColors[item.severity] || "bg-gray-100 text-gray-700";
-            const sta = statusColors[item.status] || "bg-gray-100 text-gray-700";
-            const officer = item.assignedOfficer?.fullName || "Not Assigned";
+        let activeCount = 0;
 
-            if (item.status === "RESOLVED") {
-                hasResolved = true;
-                resolvedTable.innerHTML += `
-                <tr class="hover:bg-gray-50 transition">
-                    <td class="px-6 py-4 font-medium">${item.title}</td>
-                    <td class="px-6 py-4 text-gray-500">${item.location || "—"}</td>
-                    <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-semibold ${sev}">${item.severity}</span></td>
-                    <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-semibold ${sta}">${item.status}</span></td>
-                    <td class="px-6 py-4">${officer}</td>
-                </tr>`;
-            } else {
-                hasActive = true;
+        let resolvedCount = 0;
+
+        let activeSerial = 1;
+
+        let resolvedSerial = 1;
+
+        const uniqueList =
+            Array.from(new Map(list.map(i => [i.id, i])).values());
+
+        uniqueList.forEach(i => {
+
+            const sev =
+                severityColors[i.severity] || "";
+
+            const sta =
+                statusColors[i.status] || "";
+
+            const officer =
+                i.assignedOfficer?.fullName || "Not Assigned";
+
+            // ACTIVE INCIDENTS
+            if (i.status !== "RESOLVED" && i.status !== "CLOSED") {
+
+                activeCount++;
+
                 activeTable.innerHTML += `
-                <tr class="hover:bg-gray-50 transition">
-                    <td class="px-6 py-4 font-medium">${item.title}</td>
-                    <td class="px-6 py-4 text-gray-500">${item.location || "—"}</td>
-                    <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-semibold ${sev}">${item.severity}</span></td>
-                    <td class="px-6 py-4 status"><span class="px-2 py-1 rounded-full text-xs font-semibold ${sta}">${item.status}</span></td>
-                    <td class="px-6 py-4">${officer}</td>
-                    <td class="px-6 py-4">
-                        <div class="flex gap-2">
-                            <button onclick="openAssignPopup(${item.id})"
-                                    class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-semibold transition">
-                                <i class="bi bi-person-plus mr-1"></i>Assign
-                            </button>
-                            <button onclick="deleteIncident(${item.id})"
-                                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs font-semibold transition">
-                                <i class="bi bi-trash mr-1"></i>Delete
-                            </button>
-                        </div>
-                    </td>
-                </tr>`;
+
+                    <tr class="border-b hover:bg-gray-50 transition">
+
+                        <td class="p-4 font-semibold text-gray-600">
+                            ${activeSerial++}
+                        </td>
+
+                        <td class="p-4 font-medium">
+                            ${i.title}
+                        </td>
+
+                        <td>
+                            ${i.location || "-"}
+                        </td>
+
+                        <td class="${sev}">
+                            ${i.severity}
+                        </td>
+
+                        <td class="${sta}">
+                            ${i.status}
+                        </td>
+
+                        <td>
+                            ${officer}
+                        </td>
+
+                        <td>
+
+                            <div class="flex flex-wrap gap-2 py-3">
+
+                                <button
+                                    onclick="openAssignPopup(${i.id})"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg text-xs">
+
+                                    Assign
+
+                                </button>
+
+                                <button
+                                    onclick="viewHistory(${i.id})"
+                                    class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded-lg text-xs">
+
+                                    History
+
+                                </button>
+
+                                <button
+                                    onclick="deleteIncident(${i.id})"
+                                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs">
+
+                                    Delete
+
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+                `;
+
+            }
+
+            // RESOLVED INCIDENTS
+            else {
+
+                resolvedCount++;
+
+                resolvedTable.innerHTML += `
+
+                    <tr class="border-b hover:bg-gray-50 transition">
+
+                        <td class="p-4 font-semibold text-gray-600">
+                            ${resolvedSerial++}
+                        </td>
+
+                        <td class="p-4 font-medium">
+                            ${i.title}
+                        </td>
+
+                        <td>
+                            ${i.location || "-"}
+                        </td>
+
+                        <td class="${sev}">
+                            ${i.severity}
+                        </td>
+
+                        <td class="${sta}">
+                            ${i.status}
+                        </td>
+
+                        <td>
+                            ${officer}
+                        </td>
+
+                        <td>
+
+                            <div class="flex flex-wrap gap-2 py-3">
+
+                                <button
+                                    onclick="openAssignPopup(${i.id})"
+                                    class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg text-xs">
+
+                                    Reassign
+
+                                </button>
+
+                                <button
+                                    onclick="viewHistory(${i.id})"
+                                    class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded-lg text-xs">
+
+                                    History
+
+                                </button>
+
+                                <button
+                                    onclick="deleteIncident(${i.id})"
+                                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs">
+
+                                    Delete
+
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+                `;
             }
         });
 
-        if (!hasActive) activeTable.innerHTML = `<tr><td colspan="6" class="px-6 py-6 text-center text-gray-400">No active incidents.</td></tr>`;
-        if (!hasResolved) resolvedTable.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-400">No resolved incidents yet.</td></tr>`;
+        document.getElementById("activeCount").innerText =
+            activeCount;
+
+        document.getElementById("resolvedCount").innerText =
+            resolvedCount;
     }
 
     function filterStatus() {
-        const selected = document.getElementById("statusFilter").value;
-        const filtered = selected === "ALL" ? allIncidents : allIncidents.filter(i => i.status === selected);
+
+        const val =
+            document.getElementById("statusFilter").value;
+
+        const filtered =
+            val === "ALL"
+                ? allIncidents
+                : allIncidents.filter(i => i.status === val);
+
         renderTable(filtered);
     }
 
-    async function deleteIncident(id) {
-        if (!confirm("Delete this incident? This cannot be undone.")) return;
-        await fetch(`${BASE_URL}/api/incidents/${id}`, {
-            method: "DELETE",
-            headers: { "Authorization": "Bearer " + token }
-        });
-        loadAllIncidents();
+    function viewHistory(id) {
+
+        window.location.href =
+            `incident-history.html?id=${id}`;
     }
 
-    function openAssignPopup(incidentId) {
-        selectedIncidentId = incidentId;
-        fetch(`${BASE_URL}/api/admin/officers`, { headers: { "Authorization": "Bearer " + token } })
-            .then(r => r.json())
-            .then(officers => {
-                const select = document.getElementById("officerSelect");
-                select.innerHTML = officers.map(o =>
-                    `<option value="${o.id}">${o.name} — ${o.email}</option>`).join("");
-                document.getElementById("assignPopup").classList.remove("hidden");
-                document.getElementById("assignPopup").style.display = "flex";
-            });
+    function openAssignPopup(id) {
+
+        selectedIncidentId = id;
+
+        fetch(`${BASE_URL}/api/admin/officers`, {
+
+            headers: {
+                Authorization: "Bearer " + token
+            }
+
+        })
+        .then(r => r.json())
+        .then(data => {
+
+            document.getElementById("officerSelect").innerHTML =
+                `
+                    <option value="">
+                        -- Select Officer --
+                    </option>
+                ` +
+                data.map(o => `
+                    <option value="${o.id}">
+                        ${o.fullName || o.name || o.email}
+                    </option>
+                `).join("");
+
+            const popup =
+                document.getElementById("assignPopup");
+
+            popup.classList.remove("hidden");
+
+            popup.style.display = "flex";
+        });
     }
 
     function closeAssignPopup() {
-        document.getElementById("assignPopup").classList.add("hidden");
-        document.getElementById("assignPopup").style.display = "none";
+
+        const popup =
+            document.getElementById("assignPopup");
+
+        popup.classList.add("hidden");
+
+        popup.style.display = "none";
     }
 
     async function assignOfficer() {
-        const officerId = parseInt(document.getElementById("officerSelect").value);
-        await fetch(`${BASE_URL}/api/incidents/assign`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-            body: JSON.stringify({ incidentId: selectedIncidentId, officerId })
-        });
-        closeAssignPopup();
-        loadAllIncidents();
+
+        const officerId =
+            document.getElementById("officerSelect").value;
+
+        if (!officerId) {
+
+            alert("Please select officer");
+
+            return;
+        }
+
+        try {
+
+            const res = await fetch(`${BASE_URL}/api/incidents/assign`, {
+
+                method: "PUT",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + token
+                },
+
+                body: JSON.stringify({
+                    incidentId: selectedIncidentId,
+                    officerId: Number(officerId)
+                })
+            });
+
+            if (!res.ok) {
+
+                const msg = await res.text();
+
+                throw new Error(msg);
+            }
+
+            alert("Officer assigned successfully");
+
+            closeAssignPopup();
+
+            loadAllIncidents();
+
+        } catch (err) {
+
+            console.error(err);
+
+            alert("Failed to assign officer: " + err.message);
+        }
     }
 
-    function logout() { localStorage.clear(); window.location.href = "login.html"; }
+    async function deleteIncident(id) {
+
+        try {
+
+            const confirmDelete =
+                confirm("Are you sure you want to delete this incident?");
+
+            if (!confirmDelete) return;
+
+            const res = await fetch(`${BASE_URL}/api/incidents/delete/${id}`, {
+
+                method: "DELETE",
+
+                headers: {
+                    Authorization: "Bearer " + token
+                }
+            });
+
+            if (!res.ok) {
+
+                const msg = await res.text();
+
+                console.error(msg);
+
+                alert("Delete failed! " + msg);
+
+                return;
+            }
+
+            alert("Incident deleted successfully");
+
+            loadAllIncidents();
+
+        } catch (err) {
+
+            console.error(err);
+
+            alert("Network error");
+        }
+    }
+
+    function logout() {
+
+        localStorage.clear();
+
+        window.location.href = "login.html";
+    }
 
     loadAllIncidents();
+
 </script>
 
 </body>
