@@ -1,4 +1,4 @@
-        package com.harsh.SITIMS.controller;
+package com.harsh.SITIMS.controller;
 
 import com.harsh.SITIMS.dto.AssignOfficerDTO;
 import com.harsh.SITIMS.dto.IncidentDTO;
@@ -83,11 +83,16 @@ public class IncidentController {
             return ResponseEntity.notFound().build();
         }
 
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        boolean isAdmin = user != null &&
+                user.getRole().name().equals("ADMIN");
+
         boolean isOwner =
                 incident.getReportedBy() != null &&
                         incident.getReportedBy().equals(email);
 
-        if (!isOwner) {
+        if (!isAdmin && !isOwner) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("You cannot delete this incident");
         }
@@ -226,4 +231,3 @@ public class IncidentController {
         );
     }
 }
-

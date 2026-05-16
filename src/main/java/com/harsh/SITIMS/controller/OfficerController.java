@@ -8,6 +8,7 @@ import com.harsh.SITIMS.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -166,8 +167,9 @@ public class OfficerController {
     }
 
     // ==============================
-    // ADD OFFICER
+    // ADD OFFICER — ADMIN ONLY
     // ==============================
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/add-officer")
     public ResponseEntity<?> addOfficer(
             @RequestBody User officer) {

@@ -193,6 +193,10 @@ public class IncidentServiceImpl implements IncidentService {
 
         // STEP 2: break FK references
         entityManager.createNativeQuery(
+                "UPDATE tips SET linked_incident_id = NULL WHERE linked_incident_id = ?"
+        ).setParameter(1, id).executeUpdate();
+
+        entityManager.createNativeQuery(
                 "UPDATE incident SET assigned_officer_id = NULL, created_by_id = NULL WHERE id = ?"
         ).setParameter(1, id).executeUpdate();
 

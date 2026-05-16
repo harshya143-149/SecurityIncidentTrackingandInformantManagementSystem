@@ -35,16 +35,8 @@ public class TipServiceImpl implements TipService {
         tip.setInformantUserId(dto.getInformantUserId());
 
         if (!dto.isAnonymous()) {
-
-            Informant informant = new Informant();
-            informant.setName(dto.getInformantName());
-            informant.setPhone(dto.getInformantContact());
-
-            informantRepository.save(informant);
-
             tip.setInformantName(dto.getInformantName());
             tip.setInformantContact(dto.getInformantContact());
-
         } else {
             tip.setInformantName("Anonymous");
             tip.setInformantContact("-");
@@ -57,11 +49,8 @@ public class TipServiceImpl implements TipService {
 
     @Override
     public List<TipDTO> getTipsByUser(Long userId) {
-
-        return tipRepository.findAll()
+        return tipRepository.findByInformantUserId(userId)
                 .stream()
-                .filter(t -> t.getInformantUserId() != null
-                        && t.getInformantUserId().equals(userId))
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }

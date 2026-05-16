@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.harsh.SITIMS.service.impl.UserDetailsServiceImpl;
 
 @Configuration
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -49,7 +51,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // ✅ Public endpoints — no login needed
+
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/tips/submit",
@@ -70,11 +72,11 @@ public class SecurityConfig {
                                 "/add-officer.html",
                                 "/admin-update-incident.html",
                                 "/admin-user-update.html",
+                                "/admin-officer-update.html",
                                 "/Officer-dashboard.html",
                                 "/officer-incident-details.html",
                                 "/officer-incident-list.html",
                                 "/user-edit-profile.html",
-                                "/admin-officer-update.html",
                                 "/incident-history.html",
                                 "/Officer-edit-profile.html",
                                 "/Officer-tips.html",
@@ -85,9 +87,11 @@ public class SecurityConfig {
                                 "/create-incident.html",
                                 "/informant-dashboard.html",
                                 "/informant-edit-profile.html",
-                                "/edit-officer.html","/edit-tip.html",
-                                "/my-incidents.html","/user-update-incidents.html","/my-tips.html"
-
+                                "/edit-officer.html",
+                                "/edit-tip.html",
+                                "/my-incidents.html",
+                                "/user-update-incidents.html",
+                                "/my-tips.html"
                         ).permitAll()
 
                         // ✅ USER + ADMIN incident endpoints
@@ -95,40 +99,20 @@ public class SecurityConfig {
                                 "/api/incidents/create",
                                 "/api/incidents/user/**",
                                 "/api/incidents/my",
-                                "/api/incidents/update/**"
+                                "/api/incidents/update/**",
+                                "/api/incidents/delete/**"
                         ).hasAnyRole("USER", "ADMIN")
 
-                        // ✅ FIXED — Admin only endpoints
+                        // ✅ Admin only API endpoints
                         .requestMatchers(
                                 "/api/admin/**",
-
                                 "/api/incidents/all",
-                                "/api/incidents/assign",
-                                "/api/incidents/delete/**",
-
-                                "/admin-dashboard.html",
-                                "/admin-incidents.html",
-                                "/admin-informant.html",
-                                "/admin-add-informant.html",
-                                "/admin-edit-informant.html",
-                                "/admin-tips.html",
-                                "/admin-user.html",
-                                "/admin-officers.html",
-                                "/add-officer.html",
-                                "/admin-update-incident.html",
-                                "/admin-user-update.html"
-
+                                "/api/incidents/assign"
                         ).hasRole("ADMIN")
 
-                        // ✅ FIXED — Officer only endpoints
+                        // ✅ Officer only API endpoints
                         .requestMatchers(
-                                "/api/officer/**",
-                                "/Officer-dashboard.html",
-                                "/officer-incident-details.html",
-                                "/officer-incident-list.html",
-                                "/officer-profile.html",
-                                "/Officer-tips.html",
-                                "/edit-profile.html"
+                                "/api/officer/**"
                         ).hasAnyRole("ADMIN", "OFFICER")
 
                         // ✅ All other requests need login
