@@ -16,20 +16,26 @@ public class Incident {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(columnDefinition = "TEXT")
     private String title;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(columnDefinition = "TEXT")
     private String status;  // PENDING / ASSIGNED / RESOLVED
+
+    @Column(columnDefinition = "TEXT")
     private String location;
+
+    @Column(columnDefinition = "TEXT")
     private String severity;
 
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "reported_by")
+    @Column(name = "reported_by", columnDefinition = "TEXT")
     private String reportedBy;
 
     @ManyToOne
@@ -45,6 +51,7 @@ public class Incident {
     @Column(columnDefinition = "TEXT")
     private String officerRemark;
 
+    @Column(columnDefinition = "TEXT")
     private String category;
 
     // ✅ FIX: prevents Hibernate FK blocking + avoids eager loading issues

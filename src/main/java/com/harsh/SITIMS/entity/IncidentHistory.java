@@ -26,15 +26,22 @@ public class IncidentHistory {
     private Incident incident;
 
     // Who made the change
+    @Column(columnDefinition = "TEXT")
     private String changedByName;
+
+    @Column(columnDefinition = "TEXT")
     private String changedByEmail;
+
+    @Column(columnDefinition = "TEXT")
     private String changedByRole;
 
-    // What changed
+    @Column(columnDefinition = "TEXT")
     private String oldStatus;
+
+    @Column(columnDefinition = "TEXT")
     private String newStatus;
 
-    // Why it changed
+    @Column(columnDefinition = "TEXT")
     private String remark;
 
     // When it changed
@@ -42,6 +49,6 @@ public class IncidentHistory {
     @Column(updatable = false)
     private LocalDateTime changedAt;
 
-    // Type of action
+    @Column(columnDefinition = "TEXT")
     private String actionType;
 }

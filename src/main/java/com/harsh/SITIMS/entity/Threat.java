@@ -16,15 +16,19 @@ public class Threat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(columnDefinition = "TEXT")
     private String title;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private String severity; // Low, Medium, High
+    @Column(columnDefinition = "TEXT")
+    private String severity;
 
-    private String status; // Pending, Investigating, Resolved
+    @Column(columnDefinition = "TEXT")
+    private String status;
 
+    @Column(columnDefinition = "TEXT")
     private String location;
 
     @CreationTimestamp

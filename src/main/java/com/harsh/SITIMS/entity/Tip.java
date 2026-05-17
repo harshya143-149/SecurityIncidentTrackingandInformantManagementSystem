@@ -22,12 +22,22 @@ public class Tip {
     @JoinColumn(name = "informant_id")
     private Informant informant;
 
+    @Column(columnDefinition = "TEXT")
     private String title;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(columnDefinition = "TEXT")
     private String location;
+
+    @Column(columnDefinition = "TEXT")
     private String category;
+
+    @Column(columnDefinition = "TEXT")
     private String priority;
 
+    @Column(columnDefinition = "TEXT")
     private String status;
 
     private LocalDateTime createdAt;
@@ -40,7 +50,10 @@ public class Tip {
     @JoinColumn(name = "linked_incident_id")
     private Incident linkedIncident;
 
+    @Column(columnDefinition = "TEXT")
     private String informantName;
+
+    @Column(columnDefinition = "TEXT")
     private String informantContact;
 
     // 🔥 IMPORTANT FIELD (USER LINK)

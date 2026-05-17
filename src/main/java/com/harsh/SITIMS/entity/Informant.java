@@ -14,11 +14,22 @@ public class Informant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username; // added username field
+    @Column(columnDefinition = "TEXT")
+    private String username;
+
+    @Column(columnDefinition = "TEXT")
     private String name;
+
+    @Column(columnDefinition = "TEXT")
     private String phone;
+
+    @Column(columnDefinition = "TEXT")
     private String email;
+
+    @Column(columnDefinition = "TEXT")
     private String address;
+
+    @Column(columnDefinition = "TEXT")
     private String password;
 
     // Full name getter for compatibility
